@@ -2,7 +2,7 @@
 // @id 	 Black-Wasabee-Skin
 // @name 	 Black
 // @namespace 	 https://wasabee.rocks/
-// @version 	 0.0.4
+// @version 	 0.0.5
 // @updateURL 	 https://le-jeu.github.io/dist/Black-wasabee-skin.meta.js
 // @downloadURL 	 https://le-jeu.github.io/dist/Black-wasabee-skin.user.js
 // @description 	 Black skin for Wasabee
