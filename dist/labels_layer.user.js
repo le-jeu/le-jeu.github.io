@@ -2,7 +2,7 @@
 // @author         jaiperdu
 // @name           IITC plugin: Default base maps with labels above fields
 // @category       Map Tiles
-// @version        0.1.0
+// @version        0.2.0
 // @description    Print labels as an overlay of intel layer
 // @id             labels_layer
 // @updateURL    https://le-jeu.github.io/dist/labels_layer.meta.js
@@ -19,7 +19,7 @@ if(typeof window.plugin !== 'function') window.plugin = function() {};
 //PLUGIN AUTHORS: writing a plugin outside of the IITC build environment? if so, delete these lines!!
 //(leaving them in place might break the 'About IITC' page or break update checks)
 plugin_info.buildName = 'local';
-plugin_info.dateTimeVersion = '2020-10-05-215925';
+plugin_info.dateTimeVersion = '2020-10-06-202034';
 plugin_info.pluginId = 'labels_layer';
 //END PLUGIN AUTHORS NOTE
 
@@ -28,10 +28,10 @@ plugin_info.pluginId = 'labels_layer';
 window.plugin.labelsLayer = function() {};
 
 window.plugin.labelsLayer.addLayer = function() {
-  var baseLayers = {};
+  const baseLayers = {};
 
   // create panes for labels
-  var labelPane = window.map.createPane('labels');
+  const labelPane = window.map.createPane('labels');
 
   // This pane is above links/fields
   labelPane.style.zIndex = 500;
@@ -39,8 +39,8 @@ window.plugin.labelsLayer.addLayer = function() {
   // Layers in this pane are non-interactive and do not obscure mouse/touch events
   labelPane.style.pointerEvents = 'none';
 
-  var cartoAttr = '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="http://cartodb.com/attributions">CartoDB</a>';
-  var cartoUrl = 'https://{s}.basemaps.cartocdn.com/{theme}/{z}/{x}/{y}.png';
+  const cartoAttr = '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="http://cartodb.com/attributions">CartoDB</a>';
+  const cartoUrl = 'https://{s}.basemaps.cartocdn.com/{theme}/{z}/{x}/{y}.png';
   baseLayers['CartoDB Dark Matter'] = L.layerGroup([
     L.tileLayer(cartoUrl,{attribution:cartoAttr,theme:'dark_nolabels'}),
     L.tileLayer(cartoUrl,{attribution:cartoAttr,theme:'dark_only_labels', pane: 'labels'})
@@ -82,8 +82,12 @@ window.plugin.labelsLayer.addLayer = function() {
   // replace stock basemaps
   for (const obj of window.layerChooser._layers)
     if (baseLayers[obj.name])
-    	obj.layer = baseLayers[obj.name];
-   window.layerChooser._update();
+      obj.layer = baseLayers[obj.name];
+
+  for (const name in baseLayers)
+    baseLayers[name].on('add remove', window.layerChooser._onLayerChange, window.layerChooser);
+
+  window.layerChooser._update();
 };
 
 var setup =  window.plugin.labelsLayer.addLayer;
