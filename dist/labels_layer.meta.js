@@ -2,7 +2,7 @@
 // @author         jaiperdu
 // @name           IITC plugin: Default base maps with labels above fields
 // @category       Map Tiles
-// @version        0.2.1
+// @version        0.2.2
 // @description    Print labels as an overlay of intel layer
 // @id             labels_layer
 // @updateURL      https://le-jeu.github.io/dist/labels_layer.meta.js

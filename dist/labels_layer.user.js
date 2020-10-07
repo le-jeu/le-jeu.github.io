@@ -2,7 +2,7 @@
 // @author         jaiperdu
 // @name           IITC plugin: Default base maps with labels above fields
 // @category       Map Tiles
-// @version        0.2.1
+// @version        0.2.2
 // @description    Print labels as an overlay of intel layer
 // @id             labels_layer
 // @updateURL      https://le-jeu.github.io/dist/labels_layer.meta.js
@@ -19,7 +19,7 @@ if(typeof window.plugin !== 'function') window.plugin = function() {};
 //PLUGIN AUTHORS: writing a plugin outside of the IITC build environment? if so, delete these lines!!
 //(leaving them in place might break the 'About IITC' page or break update checks)
 plugin_info.buildName = 'local';
-plugin_info.dateTimeVersion = '2020-10-06-202757';
+plugin_info.dateTimeVersion = '2020-10-07-192517';
 plugin_info.pluginId = 'labels_layer';
 //END PLUGIN AUTHORS NOTE
 
@@ -27,17 +27,15 @@ plugin_info.pluginId = 'labels_layer';
 // use own namespace for plugin
 window.plugin.labelsLayer = function() {};
 
-window.plugin.labelsLayer.addLayer = function() {
+window.plugin.labelsLayer.setup = function() {
+  $('<style>').html('\
+    .leaflet-pane.leaflet-labels-pane { z-index: 500; pointer-events: none }\
+  ').appendTo('head');
+
   const baseLayers = {};
 
   // create panes for labels
-  const labelPane = window.map.createPane('labels');
-
-  // This pane is above links/fields
-  labelPane.style.zIndex = 500;
-
-  // Layers in this pane are non-interactive and do not obscure mouse/touch events
-  labelPane.style.pointerEvents = 'none';
+  window.map.createPane('labels');
 
   const cartoAttr = '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="http://cartodb.com/attributions">CartoDB</a>';
   const cartoUrl = 'https://{s}.basemaps.cartocdn.com/{theme}/{z}/{x}/{y}.png';
@@ -90,7 +88,7 @@ window.plugin.labelsLayer.addLayer = function() {
   window.layerChooser._update();
 };
 
-var setup =  window.plugin.labelsLayer.addLayer;
+var setup =  window.plugin.labelsLayer.setup;
 
 setup.info = plugin_info; //add the script info data to the function as a property
 if(!window.bootPlugins) window.bootPlugins = [];
