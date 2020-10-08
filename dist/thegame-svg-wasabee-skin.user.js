@@ -1,14 +1,14 @@
 // ==UserScript==
-// @id 	 thegame_svg-Wasabee-Skin
-// @name 	 SVG icon set
+// @id 	 thegame-svg-wasabee-skin
+// @name 	 Wasabee Skin: TheGame SVG
 // @namespace 	 https://wasabee.rocks/
 // @version 	 0.0.2
-// @updateURL 	 https://le-jeu.github.io/dist/thegame_svg-wasabee-skin.meta.js
-// @downloadURL 	 https://le-jeu.github.io/dist/thegame_svg-wasabee-skin.user.js
+// @updateURL 	 https://le-jeu.github.io/dist/thegame-svg-wasabee-skin.meta.js
+// @downloadURL 	 https://le-jeu.github.io/dist/thegame-svg-wasabee-skin.user.js
 // @description 	 SVG Icon set for Wasabee
-// @author 	 LeJeu
+// @author 	 jaiperdu
 // @include 	 /https?:\/\/.*\.ingress\.com\/?((intel|mission)?(\/?(\?|#).*)?)?/
-// @category 	 Other
+// @category 	 Appearance
 // @grant 	 none
 // ==/UserScript==
 

@@ -1,14 +1,14 @@
 // ==UserScript==
-// @id 	 wasabee-fix-Wasabee-Skin
-// @name 	 wasabee-fix
+// @id 	 wasabee-fix-wasabee-skin
+// @name 	 Wasabee Skin: Wasabee Fix
 // @namespace 	 https://wasabee.rocks/
 // @version 	 0.0.3
 // @updateURL 	 https://le-jeu.github.io/dist/wasabee-fix-wasabee-skin.meta.js
 // @downloadURL 	 https://le-jeu.github.io/dist/wasabee-fix-wasabee-skin.user.js
-// @description 	 some UI tweaks for Wasabee
-// @author 	 LeJeu
+// @description 	 Some UI tweaks for Wasabee
+// @author 	 jaiperdu
 // @include 	 /https?:\/\/.*\.ingress\.com\/?((intel|mission)?(\/?(\?|#).*)?)?/
-// @category 	 Other
+// @category 	 Appearance
 // @grant 	 none
 // ==/UserScript==
 

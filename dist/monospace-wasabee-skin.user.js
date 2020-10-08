@@ -1,14 +1,14 @@
 // ==UserScript==
-// @id 	 monospace-Wasabee-Skin
-// @name 	 monospace
+// @id 	 monospace-wasabee-skin
+// @name 	 Wasabee Skin: Monospace
 // @namespace 	 https://wasabee.rocks/
 // @version 	 0.0.1
 // @updateURL 	 https://le-jeu.github.io/dist/monospace-wasabee-skin.meta.js
 // @downloadURL 	 https://le-jeu.github.io/dist/monospace-wasabee-skin.user.js
-// @description 	 monospace skin for Wasabee
-// @author 	 Wasabee Project Team
+// @description 	 Monospace skin for Wasabee
+// @author 	 jaiperdu
 // @include 	 /https?:\/\/.*\.ingress\.com\/?((intel|mission)?(\/?(\?|#).*)?)?/
-// @category 	 Other
+// @category 	 Appearance
 // @grant 	 none
 // ==/UserScript==
 

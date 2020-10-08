@@ -1,14 +1,14 @@
 // ==UserScript==
-// @id 	 Black-Wasabee-Skin
-// @name 	 Black
+// @id 	 black-game-wasabee-skin
+// @name 	 Wasabee Skin: Black Game
 // @namespace 	 https://wasabee.rocks/
 // @version 	 0.0.5
-// @updateURL 	 https://le-jeu.github.io/dist/Black-wasabee-skin.meta.js
-// @downloadURL 	 https://le-jeu.github.io/dist/Black-wasabee-skin.user.js
-// @description 	 Black skin for Wasabee
+// @updateURL 	 https://le-jeu.github.io/dist/black-game-wasabee-skin.meta.js
+// @downloadURL 	 https://le-jeu.github.io/dist/black-game-wasabee-skin.user.js
+// @description 	 Black Game skin for Wasabee
 // @author 	 Wasabee Project Team
 // @include 	 /https?:\/\/.*\.ingress\.com\/?((intel|mission)?(\/?(\?|#).*)?)?/
-// @category 	 Other
+// @category 	 Appearance
 // @grant 	 none
 // ==/UserScript==
 
