@@ -2,7 +2,7 @@
 // @id 	 thegame-svg-wasabee-skin
 // @name 	 Wasabee Skin: TheGame SVG
 // @namespace 	 https://wasabee.rocks/
-// @version 	 0.0.2
+// @version 	 0.0.3
 // @updateURL 	 https://le-jeu.github.io/dist/thegame-svg-wasabee-skin.meta.js
 // @downloadURL 	 https://le-jeu.github.io/dist/thegame-svg-wasabee-skin.user.js
 // @description 	 SVG Icon set for Wasabee
