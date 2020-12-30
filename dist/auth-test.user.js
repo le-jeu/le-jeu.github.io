@@ -2,7 +2,7 @@
 // @author         jaiperdu
 // @name           IITC plugin: Authentication test
 // @category       Misc
-// @version        0.1.0
+// @version        0.1.1
 // @description    Simple authentication test
 // @id             auth-test
 // @updateURL      https://le-jeu.github.io/dist/auth-test.meta.js
@@ -19,7 +19,7 @@ if(typeof window.plugin !== 'function') window.plugin = function() {};
 //PLUGIN AUTHORS: writing a plugin outside of the IITC build environment? if so, delete these lines!!
 //(leaving them in place might break the 'About IITC' page or break update checks)
 plugin_info.buildName = 'local';
-plugin_info.dateTimeVersion = '2020-12-28-160049';
+plugin_info.dateTimeVersion = '2020-12-30-155658';
 plugin_info.pluginId = 'auth-test';
 //END PLUGIN AUTHORS NOTE
 
@@ -145,6 +145,7 @@ authTest.showDialog = function () {
   }
 
   authTest.htmlLoginList = L.DomUtil.create('ul', 'authtest-profile-list', content);
+  authTest.updateHTML();
 
   dialog({
     title: "Authentication Test",

@@ -2,7 +2,7 @@
 // @author         jaiperdu
 // @name           IITC plugin: Authentication test
 // @category       Misc
-// @version        0.1.0
+// @version        0.1.1
 // @description    Simple authentication test
 // @id             auth-test
 // @updateURL      https://le-jeu.github.io/dist/auth-test.meta.js
