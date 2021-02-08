@@ -2,7 +2,7 @@
 // @author         jaiperdu
 // @name           IITC plugin: Highlight uniques captured/visited/scanned
 // @category       Highlighter
-// @version        1.5.0
+// @version        1.5.1
 // @description    Highlighter for unique visited/captured/scout controlled portals
 // @id             highlight-intel-uniques
 // @namespace      https://github.com/IITC-CE/ingress-intel-total-conversion
@@ -18,14 +18,16 @@ if(typeof window.plugin !== 'function') window.plugin = function() {};
 
 //PLUGIN AUTHORS: writing a plugin outside of the IITC build environment? if so, delete these lines!!
 //(leaving them in place might break the 'About IITC' page or break update checks)
-plugin_info.buildName = 'local';
-plugin_info.dateTimeVersion = '2021-02-07-192225';
+plugin_info.buildName = 'lejeu';
+plugin_info.dateTimeVersion = '2021-02-08-155027';
 plugin_info.pluginId = 'highlight-intel-uniques';
 //END PLUGIN AUTHORS NOTE
 
 let plugin = window.plugin.portalHighlighterVisited = function () { };
 
 let [VISITED, CAPTURED, SCANNED] = [1,2,4];
+
+let hidden = {opacity: 0, fillOpacity:0};
 
 plugin.styles = {
     "Uniques ": {
@@ -44,40 +46,40 @@ plugin.styles = {
             {fillColor:'yellow'},
             {fillColor:'magenta'},
         ],
-        default: {opacity: 0, fillOpacity:0},
+        default: hidden,
     },
     "Uniques (Captured)": {
         order: [CAPTURED],
         styles: [
             {},
         ],
-        default: {radius:0},
+        default: hidden,
     },
     "Uniques (Scoot controlled)": {
         order: [SCANNED],
         styles: [
             {},
         ],
-        default: {radius:0},
+        default: hidden,
     },
     "Uniques (Hide captured)": {
         order: [CAPTURED],
         styles: [
-            {radius:0},
+            hidden,
         ],
         default: {},
     },
     "Uniques (Hide visited)": {
         order: [VISITED | CAPTURED | SCANNED],
         styles: [
-            {radius:0},
+            hidden,
         ],
         default: {},
     },
     "Uniques (Hide scoot controlled)": {
         order: [SCANNED],
         styles: [
-            {radius:0},
+            hidden,
         ],
         default: {},
     },
