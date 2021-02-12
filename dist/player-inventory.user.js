@@ -2,7 +2,7 @@
 // @author         jaiperdu
 // @name           IITC plugin: Player Inventory
 // @category       Info
-// @version        0.2.5
+// @version        0.2.6
 // @description    View inventory
 // @id             player-inventory
 // @namespace      https://github.com/IITC-CE/ingress-intel-total-conversion
@@ -19,7 +19,7 @@ if(typeof window.plugin !== 'function') window.plugin = function() {};
 //PLUGIN AUTHORS: writing a plugin outside of the IITC build environment? if so, delete these lines!!
 //(leaving them in place might break the 'About IITC' page or break update checks)
 plugin_info.buildName = 'lejeu';
-plugin_info.dateTimeVersion = '2021-02-12-172924';
+plugin_info.dateTimeVersion = '2021-02-12-182553';
 plugin_info.pluginId = 'player-inventory';
 //END PLUGIN AUTHORS NOTE
 
@@ -627,13 +627,19 @@ const displayInventory = function (inventory) {
       heightStyle: 'fill'
   });
 
-  dialog({
-    title: 'Inventory',
-    id: 'inventory',
-    html: container,
-    width: 'auto',
-    height: 500,
-  });
+  if (window.useAndroidPanes()) {
+    plugin.dialog = L.DomUtil.create('div', 'mobile', document.body)
+    plugin.dialog.appendChild(container);
+    plugin.dialog.id = 'dialog-inventory';
+  } else {
+    plugin.dialog = dialog({
+      title: 'Inventory',
+      id: 'inventory',
+      html: container,
+      width: 'auto',
+      height: 500,
+    });
+  }
 }
 
 var setup = function () {
@@ -669,7 +675,17 @@ var setup = function () {
 }\
 #dialog-inventory table {\
   width: 100%\
-}').appendTo('head');
+}\
+\
+#dialog-inventory.mobile {\
+	position: absolute;\
+	top: 0;\
+	left: 0;\
+	width: 100%;\
+	height: 100%;\
+	overflow: auto;\
+}\
+').appendTo('head');
   let colorStyle = "";
   window.COLORS_LVL.forEach((c,i) => {
     colorStyle += `.level_L${i}{ color: ${c} }`;
@@ -704,13 +720,27 @@ var setup = function () {
   plugin.parseInventory = parseInventory;
   plugin.displayInventory = displayInventory;
 
+  plugin.dialog = null;
+
+  if (window.useAndroidPanes()) {
+    android.addPane('playerInventory', 'Inventory', 'ic_action_view_as_list');
+    addHook('paneChanged', function (pane) {
+      if (pane === 'playerInventory') {
+        displayInventory(plugin.inventory);
+      } else if (plugin.dialog) {
+        plugin.dialog.remove();
+      }
+    });
+  } else {
+    $('<a>')
+      .html('Inventory')
+      .attr('title','Show inventory')
+      .click(() => displayInventory(plugin.inventory))
+      .appendTo('#toolbox');
+  }
+
   window.addHook('iitcLoaded', getSubscriptionStatus);
 
-  $('<a>')
-        .html('Inventory')
-        .attr('title','Show inventory')
-        .click(() => displayInventory(plugin.inventory))
-        .appendTo('#toolbox');
 };
 
 setup.info = plugin_info; //add the script info data to the function as a property
