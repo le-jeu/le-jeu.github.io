@@ -2,7 +2,7 @@
 // @author         jaiperdu
 // @name           IITC plugin: Player Inventory
 // @category       Info
-// @version        0.2.3
+// @version        0.2.4
 // @description    View inventory
 // @id             player-inventory
 // @namespace      https://github.com/IITC-CE/ingress-intel-total-conversion
@@ -19,7 +19,7 @@ if(typeof window.plugin !== 'function') window.plugin = function() {};
 //PLUGIN AUTHORS: writing a plugin outside of the IITC build environment? if so, delete these lines!!
 //(leaving them in place might break the 'About IITC' page or break update checks)
 plugin_info.buildName = 'lejeu';
-plugin_info.dateTimeVersion = '2021-02-12-133134';
+plugin_info.dateTimeVersion = '2021-02-12-142647';
 plugin_info.pluginId = 'player-inventory';
 //END PLUGIN AUTHORS NOTE
 
@@ -399,6 +399,7 @@ const parseContainer = function (container) {
   const data = {
     type: container.resource.resourceType,
     name: containerName,
+    size: container.container.currentCount,
     content: [],
     rarity: container.resource.resourceRarity,
   };
@@ -459,18 +460,7 @@ const parseInventory = function (name, data) {
 };
 
 const plugin = {};
-
-// for local testing
-if (!window || !window.plugin) {
-  const fs = require('fs');
-  const json = fs.readFileSync("./json_examples/inventory.json")
-  const data = JSON.parse(json);
-  const inventory = parseInventory("Inventory", data.result);
-  console.log(inventory);
-  console.log(inventory.keys);
-  console.log(inventory.capsules);
-}
-if (window && window.plugin) window.plugin.playerInventory = plugin;
+window.plugin.playerInventory = plugin;
 
 // again...
 const getPortalLink = function(key) {
@@ -560,7 +550,7 @@ const createAllTable = function (inventory) {
       if (num > 0) {
         const lr = (leveled) ? "L" + (+i+1) : rarityShort[i];
         const row = L.DomUtil.create('tr', ((leveled) ? "level_" : "rarity_") + lr, table);
-        row.innerHTML = `<td>${item.name}</td><td>${lr}</td><td>x${num}</td>`;
+        row.innerHTML = `<td>${item.name}</td><td>${lr}</td><td>${num}</td>`;
       }
     }
   }
@@ -600,12 +590,37 @@ const createKeysTable = function (inventory) {
   for (const key of keys) {
     const a = getPortalLink(key);
     const total = inventory.countKey(key.guid);
-    const counts = Array.from(key.count).map(([name, count]) => `${count}(${name})`).join(', ');
+    const counts = Array.from(key.count).map(([name, count]) => `${name}: ${count}`).join(', ');
 
     const row = L.DomUtil.create('tr', null, table);
     L.DomUtil.create('td', null, row).appendChild(a);
     L.DomUtil.create('td', null, row).textContent = total;
     L.DomUtil.create('td', null, row).textContent = counts;
+  }
+  return table;
+}
+
+const createCapsuleTable = function (inventory, capsule) {
+  const table = L.DomUtil.create("table");
+  for (const item of capsule.content) {
+    if (item.type !== "PORTAL_LINK_KEY")
+      continue;
+    const a = getPortalLink({title: item.portalTitle, latLng: item.latLng});
+    const total = item.count;
+
+    const row = L.DomUtil.create('tr', null, table);
+    L.DomUtil.create('td', null, row).appendChild(a);
+    L.DomUtil.create('td', null, row).textContent = total;
+    L.DomUtil.create('td', null, row);
+  }
+  for (const item of capsule.content) {
+    if (item.type === "PORTAL_LINK_KEY")
+      continue;
+    const name = itemTypes[item.type];
+    const leveled = levelItemTypes.includes(item.type);
+    const lr = (leveled) ? "L" + (item.level) : rarityShort[rarityToInt[item.rarity]];
+    const row = L.DomUtil.create('tr', ((leveled) ? "level_" : "rarity_") + lr, table);
+    row.innerHTML = `<td>${name}</td><td>${lr}</td><td>${item.count}</td>`;
   }
   return table;
 }
@@ -627,6 +642,14 @@ const displayInventory = function (inventory) {
   keysHeader.textContent = "Keys";
   const keys = L.DomUtil.create("div", "keys", container);
   keys.appendChild(createKeysTable(inventory));
+
+  for (const name in inventory.capsules) {
+    const capsule = inventory.capsules[name];
+    if (capsule.size > 0) {
+      L.DomUtil.create("b", null, container).textContent = `${name} (${capsule.size})`;
+      L.DomUtil.create("div", "capsule", container).appendChild(createCapsuleTable(inventory, capsule));
+    }
+  }
 
   $(container).accordion({
       header: 'b',
@@ -664,6 +687,14 @@ var setup = function () {
 \
 #dialog-inventory table tr:nth-child(2n + 1) {\
   background: rgba(0, 0, 0, 0.3);\
+}\
+\
+#dialog-inventory tr td:nth-child(2) {\
+  text-align: right;\
+}\
+\
+#dialog-inventory .all tr td:nth-child(3) {\
+  text-align: right;\
 }').appendTo('head');
   let colorStyle = "";
   window.COLORS_LVL.forEach((c,i) => {
