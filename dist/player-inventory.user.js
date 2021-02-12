@@ -2,7 +2,7 @@
 // @author         jaiperdu
 // @name           IITC plugin: Player Inventory
 // @category       Info
-// @version        0.2.4
+// @version        0.2.5
 // @description    View inventory
 // @id             player-inventory
 // @namespace      https://github.com/IITC-CE/ingress-intel-total-conversion
@@ -19,7 +19,7 @@ if(typeof window.plugin !== 'function') window.plugin = function() {};
 //PLUGIN AUTHORS: writing a plugin outside of the IITC build environment? if so, delete these lines!!
 //(leaving them in place might break the 'About IITC' page or break update checks)
 plugin_info.buildName = 'lejeu';
-plugin_info.dateTimeVersion = '2021-02-12-142647';
+plugin_info.dateTimeVersion = '2021-02-12-172924';
 plugin_info.pluginId = 'player-inventory';
 //END PLUGIN AUTHORS NOTE
 
@@ -114,28 +114,47 @@ class Inventory {
       this.items[type] = {
         type: type,
         name: itemTypes[type],
-        counts: [{},{},{},{},{},{}],
+        leveled: levelItemTypes.includes(type),
+        counts: {},
+        total: 0,
       }
-      if (levelItemTypes.includes(type))
-        this.items[type].counts = [{},{},{},{},{},{},{},{}];
     }
   }
 
   addCapsule(capsule) {
-    this.capsules[capsule.name] = capsule;
+    const data = {
+      name: capsule.name,
+      size: capsule.size,
+      type: capsule.type,
+      keys: {},
+      medias: {},
+      items: {},
+    }
+    this.capsules[capsule.name] = data;
+    this.addItem(capsule);
     for (const item of capsule.content) {
-        this.addItem(item);
+      this.addItem(item);
+      if (item.type === "PORTAL_LINK_KEY")
+        data.keys[item.guid] = item;
+      else if (item.type === "MEDIA")
+        data.medias[item.mediaId] = item;
+      else {
+        if (!data.items[item.type]) data.items[item.type] = {repr: item, leveled: levelItemTypes.includes(item.type), count:{}};
+        data.items[item.type].count[item.rarity || item.level] = item.count;
+      }
     }
   }
 
   addItem(item) {
     const cat = this.items[item.type];
-    const count =
-      (levelItemTypes.includes(item.type))
-      ? cat.counts[item.level-1]
-      : cat.counts[rarityToInt[item.rarity]];
+    const lr = cat.leveled ? item.level : item.rarity;
+    if (!cat.counts[lr]) cat.counts[lr] = {};
+    const count = cat.counts[lr];
     if (!item.capsule) item.capsule = this.name;
-    count[item.capsule] = (count[item.capsule] || 0) + item.count
+    if (!item.count) item.count = 1;
+    count[item.capsule] = (count[item.capsule] || 0) + item.count;
+    count.total = (count.total || 0) + item.count;
+    cat.total += item.count;
 
     if (item.type === "PORTAL_LINK_KEY") {
       this.addKey(item);
@@ -145,18 +164,11 @@ class Inventory {
   }
 
   countType(type, levelRarity) {
-    const counts = this.items[type].counts;
+    const cat = this.items[type];
     if (levelRarity !== undefined) {
-      const count = counts[levelRarity];
-      let total = 0;
-      for (const capsule in count) total += count[capsule];
-      return total;
+      return cat.counts[levelRarity] ? cat.counts[levelRarity].total : 0;
     }
-    let total = 0;
-    for (const count of counts) {
-      for (const capsule in count) total += count[capsule];
-    }
-    return total;
+    return cat.total;
   }
 
   addMedia(media) {
@@ -165,77 +177,27 @@ class Inventory {
 
   countKey(guid) {
     if (!this.keys.has(guid)) return 0;
-    const count = this.keys.get(guid).count;
-    let total = 0;
-    for (const v of count.values()) total += v;
-    return total;
+    return this.keys.get(guid).total;
   }
 
   addKey(key) {
-    if (!this.keys.has(key.portalGuid))
-      this.keys.set(key.portalGuid, {
-        guid: key.portalGuid,
-        title: key.portalTitle,
+    if (!this.keys.has(key.guid))
+      this.keys.set(key.guid, {
+        guid: key.guid,
+        title: key.title,
         latLng: key.latLng,
         count: new Map(),
+        total: 0,
       });
-    const current = this.keys.get(key.portalGuid);
+    const current = this.keys.get(key.guid);
     const entry = current.count.get(key.capsule) || 0;
-    current.count.set(key.capsule, entry + key.count);
+    current.count.set(key.capsule, entry + (key.count || 1));
+    current.total += (key.count || 1);
   }
-}
-
-const isKey = function (obj) {
-  return obj.resource && obj.resource.resourceType == "PORTAL_LINK_KEY";
 }
 
 const parsePortalLocation = function (location) {
   return [lat, lng] = location.split(',').map(a => (Number.parseInt(a,16)&(-1))*1e-6);
-}
-
-/*
-{
-  "resource": {
-    "resourceType": "PORTAL_LINK_KEY",
-    "resourceRarity": "VERY_COMMON"
-  },
-  "portalCoupler": {
-    "portalGuid": "...",
-    "portalLocation": "int32 hex,int32 hex",
-    "portalImageUrl": "...",
-    "portalTitle": "...",
-    "portalAddress": "..."
-  },
-  "inInventory": {
-    "playerId": "...",
-    "acquisitionTimestampMs": "..."
-  }
-}
-*/
-const parsePortalKey = function (key) {
-  const data = {
-    type: "PORTAL_LINK_KEY",
-    portalGuid: key.portalCoupler.portalGuid,
-    portalTitle: key.portalCoupler.portalTitle,
-    latLng: parsePortalLocation(key.portalCoupler.portalLocation),
-    rarity: key.resource.resourceRarity,
-    count: 1,
-  };
-  return data;
-}
-
-// {
-//   "resourceWithLevels": {
-//     "resourceType": "EMITTER_A",
-//     "level": 7
-//   }
-// }
-const parseLevelItem = function (item) {
-  return {
-    type: item.resourceWithLevels.resourceType,
-    level: item.resourceWithLevels.level,
-    count: 1,
-  }
 }
 
 /*
@@ -266,29 +228,8 @@ const parseMod = function (mod) {
     type: mod.modResource.resourceType,
     name: mod.modResource.displayName,
     rarity: mod.modResource.rarity,
-    count: 1,
   }
 }
-
-/*
-{
-  "resource": {
-    "resourceType": "FLIP_CARD",
-    "resourceRarity": "VERY_RARE"
-  },
-  "flipCard": {
-    "flipCardType": "JARVIS"
-  }
-}
-*/
-const parseFlipCard = function (flipcard) {
-  return {
-    type: flipcard.resource.resourceType + ':' + flipcard.flipCard.flipCardType,
-    rarity: flipcard.resource.resourceRarity,
-    count: 1,
-  }
-}
-
 
 /*
 {
@@ -314,14 +255,69 @@ const parseFlipCard = function (flipcard) {
     "releaseDate": "1571122800000"
   }
 */
-const parseMedia = function (media) {
-  return {
-    type: media.resourceWithLevels.resourceType,
-    mediaId: media.storyItem.mediaId,
-    name: media.storyItem.shortDescription,
-    level: media.resourceWithLevels.level,
-    count: 1,
+const parseMedia = function (data, media) {
+  data.mediaId = media.storyItem.mediaId;
+  data.name = media.storyItem.shortDescription;
+  data.url = media.storyItem.primaryUrl;
+  return data;
+}
+
+// {
+//   "resourceWithLevels": {
+//     "resourceType": "EMITTER_A",
+//     "level": 7
+//   }
+// }
+const parseLevelItem = function (obj) {
+  const data = {
+    type: obj.resourceWithLevels.resourceType,
+    level: obj.resourceWithLevels.level,
+  };
+  if (obj.storyItem)
+    return parseMedia(data, obj);
+  return data;
+}
+
+/*
+{
+  "resource": {
+    "resourceType": "PORTAL_LINK_KEY",
+    "resourceRarity": "VERY_COMMON"
+  },
+  "portalCoupler": {
+    "portalGuid": "...",
+    "portalLocation": "int32 hex,int32 hex",
+    "portalImageUrl": "...",
+    "portalTitle": "...",
+    "portalAddress": "..."
+  },
+  "inInventory": {
+    "playerId": "...",
+    "acquisitionTimestampMs": "..."
   }
+}
+*/
+const parsePortalKey = function (data, key) {
+  data.guid = key.portalCoupler.portalGuid;
+  data.title = key.portalCoupler.portalTitle;
+  data.latLng = parsePortalLocation(key.portalCoupler.portalLocation);
+  return data;
+}
+
+/*
+{
+  "resource": {
+    "resourceType": "FLIP_CARD",
+    "resourceRarity": "VERY_RARE"
+  },
+  "flipCard": {
+    "flipCardType": "JARVIS"
+  }
+}
+*/
+const parseFlipCard = function (data, flipcard) {
+  data.type += ':' + flipcard.flipCard.flipCardType;
+  return data;
 }
 
 /*
@@ -339,12 +335,9 @@ const parseMedia = function (media) {
   }
 }
 */
-const parsePlayerPowerUp = function (powerup) {
-  return {
-    type: powerup.resource.resourceType + ':' + powerup.playerPowerupResource.playerPowerupEnum,
-    rarity: powerup.resource.resourceRarity,
-    count: 1,
-  }
+const parsePlayerPowerUp = function (data, powerup) {
+  data.type += ':' + powerup.playerPowerupResource.playerPowerupEnum;
+  return data;
 }
 
 /*
@@ -360,12 +353,9 @@ const parsePlayerPowerUp = function (powerup) {
   }
 }
 */
-const parsePortalPowerUp = function (powerup) {
-  return {
-    type: powerup.resource.resourceType + ':' + powerup.timedPowerupResource.designation,
-    rarity: powerup.resource.resourceRarity,
-    count: 1,
-  }
+const parsePortalPowerUp = function (data, powerup) {
+  data.type += ':' + powerup.timedPowerupResource.designation;
+  return data;
 }
 /*
 {
@@ -394,25 +384,38 @@ const parsePortalPowerUp = function (powerup) {
   }
 }
 */
-const parseContainer = function (container) {
-  const containerName = container.moniker.differentiator;
-  const data = {
-    type: container.resource.resourceType,
-    name: containerName,
-    size: container.container.currentCount,
-    content: [],
-    rarity: container.resource.resourceRarity,
-  };
+const parseContainer = function (data, container) {
+  data.name = container.moniker.differentiator;
+  data.size = container.container.currentCount;
+  data.content = [];
   for (const stackableItem of container.container.stackableItems) {
     const item = parseItem(stackableItem.exampleGameEntity);
     if (item) {
-      item.count *= stackableItem.itemGuids.length;
+      item.count = stackableItem.itemGuids.length;
       item.capsule = data.name;
       data.content.push(item);
     }
   }
   return data;
 };
+
+const parseResource = function (obj) {
+  const data = {
+    type: obj.resource.resourceType,
+    rarity: obj.resource.resourceRarity,
+  };
+  if (obj.flipCard)
+    return parseFlipCard(data, obj);
+  if (obj.container)
+    return parseContainer(data, obj);
+  if (obj.portalCoupler)
+    return parsePortalKey(data, obj);
+  if (obj.timedPowerupResource)
+    return parsePortalPowerUp(data, obj);
+  if (obj.playerPowerupResource)
+    return parsePlayerPowerUp(data, obj);
+  return data;
+}
 /*
 [
   guid, timestamp?, item object
@@ -420,28 +423,12 @@ const parseContainer = function (container) {
 */
 const parseItem = function (item) {
   const [id, ts, obj] = item;
-  if (obj.storyItem)
-    return parseMedia(obj);
+  if (obj.resource)
+    return parseResource(obj);
   if (obj.resourceWithLevels)
     return parseLevelItem(obj);
   if (obj.modResource)
     return parseMod(obj);
-  if (obj.flipCard)
-    return parseFlipCard(obj);
-  if (obj.container)
-    return parseContainer(obj);
-  if (isKey(obj))
-    return parsePortalKey(obj);
-  if (obj.timedPowerupResource)
-    return parsePortalPowerUp(obj);
-  if (obj.playerPowerupResource)
-    return parsePlayerPowerUp(obj);
-  if (obj.resource)
-    return {
-      type: obj.resource.resourceType,
-      rarity: obj.resource.resourceRarity,
-      count: 1
-    }
   // xxx: other types
 };
 
@@ -501,22 +488,6 @@ const getSubscriptionStatus = function () {
   window.postAjax('getHasActiveSubscription', {}, handleSubscription, handleError);
 };
 
-const injectKeys = function(data) {
-  const bounds = window.map.getBounds();
-  const entities = [];
-  for (const [guid, key] of plugin.inventory.keys) {
-    if (bounds.contains(key.latLng) && !window.portals[guid]) {
-      const ent = [
-        guid,
-        0,
-        ['p', null, Math.round(key.latLng[0]*1e6), Math.round(key.latLng[1]*1e6)]
-      ];
-      entities.push(ent);
-    }
-  }
-  data.callback(entities);
-}
-
 const updateLayer = function () {
   plugin.layer.clearLayers();
 
@@ -544,12 +515,11 @@ const createAllTable = function (inventory) {
     if (total == 0)
       continue;
     const item = inventory.items[type];
-    const leveled = levelItemTypes.includes(type);
     for (const i in item.counts) {
       const num = inventory.countType(type, i);
       if (num > 0) {
-        const lr = (leveled) ? "L" + (+i+1) : rarityShort[i];
-        const row = L.DomUtil.create('tr', ((leveled) ? "level_" : "rarity_") + lr, table);
+        const lr = item.leveled ? "L" + i : rarityShort[rarityToInt[i]];
+        const row = L.DomUtil.create('tr', (item.leveled ? "level_" : "rarity_") + lr, table);
         row.innerHTML = `<td>${item.name}</td><td>${lr}</td><td>${num}</td>`;
       }
     }
@@ -564,22 +534,20 @@ const createAllSumTable = function (inventory) {
     if (total == 0)
       continue;
     const item = inventory.items[type];
-    const leveled = levelItemTypes.includes(type);
 
     const row = L.DomUtil.create('tr', null, table);
 
-    const nums = item.counts
-      .map((_,i) => inventory.countType(type, i))
-      .map((num,i) => {
-        const lr = (leveled) ? "L" + (+i+1) : rarityShort[i];
-        const className = (leveled ? "level_" : "rarity_") + lr;
-        return [num, `<span class="${className}">${num} ${lr}</span>`];
-      })
-      .filter(t => t[0] > 0)
-      .map(t => t[1])
-      .join(', ');
+    const nums = [];
+    for (const k in item.counts) {
+      const num = inventory.countType(type, k);
+      if (num > 0) {
+        const lr = item.leveled ? "L" + k : rarityShort[rarityToInt[k]];
+        const className = (item.leveled ? "level_" : "rarity_") + lr;
+        nums.push(`<span class="${className}">${num} ${lr}</span>`);
+      }
+    }
 
-    row.innerHTML = `<td>${item.name}</td><td>${total}</td><td>${nums}</td>`;
+    row.innerHTML = `<td>${item.name}</td><td>${total}</td><td>${nums.join(', ')}</td>`;
   }
   return table;
 }
@@ -602,10 +570,9 @@ const createKeysTable = function (inventory) {
 
 const createCapsuleTable = function (inventory, capsule) {
   const table = L.DomUtil.create("table");
-  for (const item of capsule.content) {
-    if (item.type !== "PORTAL_LINK_KEY")
-      continue;
-    const a = getPortalLink({title: item.portalTitle, latLng: item.latLng});
+  for (const guid in capsule.keys) {
+    const item = capsule.keys[guid];
+    const a = getPortalLink(item);
     const total = item.count;
 
     const row = L.DomUtil.create('tr', null, table);
@@ -613,14 +580,18 @@ const createCapsuleTable = function (inventory, capsule) {
     L.DomUtil.create('td', null, row).textContent = total;
     L.DomUtil.create('td', null, row);
   }
-  for (const item of capsule.content) {
-    if (item.type === "PORTAL_LINK_KEY")
-      continue;
-    const name = itemTypes[item.type];
-    const leveled = levelItemTypes.includes(item.type);
-    const lr = (leveled) ? "L" + (item.level) : rarityShort[rarityToInt[item.rarity]];
-    const row = L.DomUtil.create('tr', ((leveled) ? "level_" : "rarity_") + lr, table);
-    row.innerHTML = `<td>${name}</td><td>${lr}</td><td>${item.count}</td>`;
+  for (const id in capsule.medias) {
+    const item = capsule.medias[id];
+    L.DomUtil.create('tr', null, table).innerHTML = `<td><a href="${item.url}">${item.name}</a><td></td><td>${item.count}</td>`;
+  }
+  for (const type in capsule.items) {
+    const item = capsule.items[type];
+    const name = itemTypes[type];
+    for (const k in item.count) {
+      const lr = item.leveled ? "L" + k : rarityShort[rarityToInt[k]];
+      const row = L.DomUtil.create('tr', (item.leveled ? "level_" : "rarity_") + lr, table);
+      row.innerHTML = `<td>${name}</td><td>${lr}</td><td>${item.count[k]}</td>`;
+    }
   }
   return table;
 }
@@ -646,7 +617,7 @@ const displayInventory = function (inventory) {
   for (const name in inventory.capsules) {
     const capsule = inventory.capsules[name];
     if (capsule.size > 0) {
-      L.DomUtil.create("b", null, container).textContent = `${name} (${capsule.size})`;
+      L.DomUtil.create("b", null, container).textContent = `${itemTypes[capsule.type]}: ${name} (${capsule.size})`;
       L.DomUtil.create("div", "capsule", container).appendChild(createCapsuleTable(inventory, capsule));
     }
   }
@@ -695,6 +666,9 @@ var setup = function () {
 \
 #dialog-inventory .all tr td:nth-child(3) {\
   text-align: right;\
+}\
+#dialog-inventory table {\
+  width: 100%\
 }').appendTo('head');
   let colorStyle = "";
   window.COLORS_LVL.forEach((c,i) => {
@@ -730,7 +704,6 @@ var setup = function () {
   plugin.parseInventory = parseInventory;
   plugin.displayInventory = displayInventory;
 
-  //window.addHook('mapDataEntityInject', injectKeys);
   window.addHook('iitcLoaded', getSubscriptionStatus);
 
   $('<a>')
