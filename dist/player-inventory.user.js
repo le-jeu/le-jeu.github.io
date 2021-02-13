@@ -2,7 +2,7 @@
 // @author         jaiperdu
 // @name           IITC plugin: Player Inventory
 // @category       Info
-// @version        0.2.6
+// @version        0.2.7
 // @description    View inventory
 // @id             player-inventory
 // @namespace      https://github.com/IITC-CE/ingress-intel-total-conversion
@@ -19,7 +19,7 @@ if(typeof window.plugin !== 'function') window.plugin = function() {};
 //PLUGIN AUTHORS: writing a plugin outside of the IITC build environment? if so, delete these lines!!
 //(leaving them in place might break the 'About IITC' page or break update checks)
 plugin_info.buildName = 'lejeu';
-plugin_info.dateTimeVersion = '2021-02-12-182553';
+plugin_info.dateTimeVersion = '2021-02-13-194532';
 plugin_info.pluginId = 'player-inventory';
 //END PLUGIN AUTHORS NOTE
 
@@ -468,9 +468,33 @@ const getPortalLink = function(key) {
   return a;
 }
 
+const STORE_KEY = "plugin-player-inventory";
+
+const loadFromLocalStorage = function () {
+  const store = localStorage[STORE_KEY];
+  if (store) {
+    try {
+      const data = JSON.parse(store);
+      plugin.inventory = parseInventory("⌂", data.raw);
+    } catch (e) {console.log(e);}
+  }
+}
+
+const storeToLocalStorage = function (data) {
+  const store = {
+    raw: data,
+    date: Date.now(),
+  }
+  localStorage[STORE_KEY] = JSON.stringify(store);
+}
+
 const handleInventory = function (data) {
-  plugin.inventory = parseInventory("⌂", data.result);
-  plugin.updateLayer();
+  if (data.result.length > 0) {
+    plugin.inventory = parseInventory("⌂", data.result);
+    storeToLocalStorage(data.result);
+  } else {
+    console.log("Inventory empty, probably hitting rate limit");
+  }
 }
 
 const handleError = function () {};
@@ -488,6 +512,59 @@ const getSubscriptionStatus = function () {
   window.postAjax('getHasActiveSubscription', {}, handleSubscription, handleError);
 };
 
+const injectKeys = function(data) {
+  if (window._current_highlighter !== "Inventory keys")
+    return;
+
+  const bounds = window.map.getBounds();
+  const entities = [];
+  for (const [guid, key] of plugin.inventory.keys) {
+    if (bounds.contains(key.latLng)) {
+      // keep known team
+      const team = window.portals[guid] ? window.portals[guid].options.ent[2][1] : 'N';
+      const ent = [
+        guid,
+        0,
+        ['p', team, Math.round(key.latLng[0]*1e6), Math.round(key.latLng[1]*1e6)]
+      ];
+      entities.push(ent);
+    }
+  }
+  data.callback(entities);
+}
+
+const portalKeyHighlight = function(data) {
+  const guid = data.portal.options.guid;
+  if (plugin.inventory.keys.has(guid)) {
+    // place holder
+    if (data.portal.options.team != TEAM_NONE && data.portal.options.level === 0) {
+      data.portal.setStyle({
+        color: 'red',
+        weight: 2*Math.sqrt(window.portalMarkerScale()),
+        dashArray: '',
+      });
+    }
+    else if (window.map.getZoom() < 15 && data.portal.options.team == TEAM_NONE && !window.portalDetail.isFresh(guid))
+      // injected without intel data
+      data.portal.setStyle({color: 'red', fillColor: 'gray'});
+    else data.portal.setStyle({color: 'red'});
+  }
+}
+
+const createPopup = function (guid) {
+  const portal = window.portals[guid];
+  const latLng = portal.getLatLng();
+  // create popup only if the portal is in view
+  if (window.map.getBounds().contains(latLng)) {
+    const count = plugin.inventory.keys.get(guid).count;
+    const text = Array.from(count).map(([name, count]) => `<strong>${name}</strong>: ${count}`).join('<br/>');
+
+    const popup = L.popup()
+      .setLatLng(latLng)
+      .setContent('<div class="inventory-keys">' + text + '</div>').openOn(window.map);
+  }
+}
+
 const updateLayer = function () {
   plugin.layer.clearLayers();
 
@@ -502,7 +579,7 @@ const updateLayer = function () {
     });
 
     const count = Array.from(key.count).map(([name, count]) => `<strong>${name}</strong>: ${count}`).join('<br/>');
-    marker.bindPopup(count);
+    marker.bindPopup('<div class="inventory-keys">' + count + '</div>');
     marker.addTo(plugin.layer);
   }
 }
@@ -685,6 +762,10 @@ var setup = function () {
 	height: 100%;\
 	overflow: auto;\
 }\
+/* popup */\
+.inventory-keys {\
+  width: max-content;\
+}\
 ').appendTo('head');
   let colorStyle = "";
   window.COLORS_LVL.forEach((c,i) => {
@@ -701,18 +782,18 @@ var setup = function () {
   plugin.inventory = new Inventory();
   plugin.layer = new L.LayerGroup();
 
-  window.addHook('mapDataRefreshEnd', updateLayer);
+  //window.addHook('mapDataRefreshEnd', updateLayer);
 
-  window.addLayerGroup('Inventory Keys', plugin.layer, true);
+  //window.addLayerGroup('Inventory Keys', plugin.layer, true);
+  window.addPortalHighlighter('Inventory keys', portalKeyHighlight);
 
-  window.addHook('portalDetailsUpdated', (data) => {
-    //{guid: guid, portal: portal, portalDetails: details, portalData: data}
-    const total = plugin.inventory.countKey(data.guid);
-    if (total > 0) {
-      const count = plugin.inventory.keys.get(data.guid).count;
-      const text = Array.from(count).map(([name, count]) => `<strong>${name}</strong>: ${count}`).join('<br/>');
-
-      window.portals[data.guid].bindPopup(text).openPopup();
+  window.addHook('portalSelected', (data) => {
+    //{selectedPortalGuid: guid, unselectedPortalGuid: oldPortalGuid}
+    if (data.selectedPortalGuid) {
+      const total = plugin.inventory.countKey(data.selectedPortalGuid);
+      if (total > 0) {
+        createPopup(data.selectedPortalGuid);
+      }
     }
   });
 
@@ -739,8 +820,10 @@ var setup = function () {
       .appendTo('#toolbox');
   }
 
+  window.addHook('mapDataEntityInject', injectKeys);
   window.addHook('iitcLoaded', getSubscriptionStatus);
 
+  loadFromLocalStorage();
 };
 
 setup.info = plugin_info; //add the script info data to the function as a property
