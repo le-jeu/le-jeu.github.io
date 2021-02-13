@@ -2,7 +2,7 @@
 // @author         jaiperdu
 // @name           IITC plugin: Player Inventory
 // @category       Info
-// @version        0.2.7
+// @version        0.2.8
 // @description    View inventory
 // @id             player-inventory
 // @namespace      https://github.com/IITC-CE/ingress-intel-total-conversion
@@ -19,7 +19,7 @@ if(typeof window.plugin !== 'function') window.plugin = function() {};
 //PLUGIN AUTHORS: writing a plugin outside of the IITC build environment? if so, delete these lines!!
 //(leaving them in place might break the 'About IITC' page or break update checks)
 plugin_info.buildName = 'lejeu';
-plugin_info.dateTimeVersion = '2021-02-13-194532';
+plugin_info.dateTimeVersion = '2021-02-13-203547';
 plugin_info.pluginId = 'player-inventory';
 //END PLUGIN AUTHORS NOTE
 
@@ -789,7 +789,7 @@ var setup = function () {
 
   window.addHook('portalSelected', (data) => {
     //{selectedPortalGuid: guid, unselectedPortalGuid: oldPortalGuid}
-    if (data.selectedPortalGuid) {
+    if (data.selectedPortalGuid && data.selectedPortalGuid !== data.unselectedPortalGuid) {
       const total = plugin.inventory.countKey(data.selectedPortalGuid);
       if (total > 0) {
         createPopup(data.selectedPortalGuid);
