@@ -2,7 +2,7 @@
 // @author         jaiperdu
 // @name           IITC plugin: Highlight uniques captured/visited/scanned
 // @category       Highlighter
-// @version        1.5.2
+// @version        1.5.3
 // @description    Highlighter for unique visited/captured/scout controlled portals
 // @id             highlight-intel-uniques
 // @namespace      https://github.com/IITC-CE/ingress-intel-total-conversion
@@ -19,7 +19,7 @@ if(typeof window.plugin !== 'function') window.plugin = function() {};
 //PLUGIN AUTHORS: writing a plugin outside of the IITC build environment? if so, delete these lines!!
 //(leaving them in place might break the 'About IITC' page or break update checks)
 plugin_info.buildName = 'lejeu';
-plugin_info.dateTimeVersion = '2021-02-10-163624';
+plugin_info.dateTimeVersion = '2021-02-14-152832';
 plugin_info.pluginId = 'highlight-intel-uniques';
 //END PLUGIN AUTHORS NOTE
 
@@ -27,7 +27,7 @@ let plugin = window.plugin.portalHighlighterVisited = function () { };
 
 let [VISITED, CAPTURED, SCANNED] = [1,2,4];
 
-let hidden = {opacity: 0, fillOpacity:0};
+let hidden = {opacity: 0, fillOpacity:0, interactive: false};
 
 plugin.styles = {
     "Uniques ": {
@@ -86,7 +86,8 @@ plugin.styles = {
 };
 
 plugin.highlighter = function (data, style) {
-    let visited = data.portal.options.ent[2][18];
+    const history = data.portal.options.data.history;
+    const visited = history ? history._raw : data.portal.options.ent[2][18];
 
     if (visited == null) {
         data.portal.setStyle(style.default);
@@ -103,8 +104,8 @@ plugin.highlighter = function (data, style) {
 };
 
 var setup = function () {
-    for (let name in plugin.styles) {
-        let style = plugin.styles[name];
+    for (const name in plugin.styles) {
+        const style = plugin.styles[name];
         window.addPortalHighlighter(name, function (data) {
             return plugin.highlighter(data, style);
         });
