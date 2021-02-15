@@ -1,4 +1,19 @@
 <html>
+<head>
+	<title>IITC Plugins by jaiperdu/LeJeu</title>
+	<style>
+		dt {
+		  padding: .5em .5em;
+		  font-weight: bold;
+		  border-bottom: 1px solid;
+		}
+
+		dd {
+		  margin: 0 0 1em 0;
+		  padding: 1em .5em;
+		}
+	</style>
+</head>
 <body>
 <h1>You lost the Game.</h1>
 
@@ -6,13 +21,27 @@ But here are some scripts for you.
 
 <h2>IITC Plugins</h2>
 
-<ul>
-	<li><a href="dist/basemap-google-custom.user.js">Configurable Google Map</a></li>
-	<li><a href="dist/labels_layer.user.js">CartoDB and default Ingress map with labels above Ingress layers</a></li>
-	<li><a href="dist/portals-pictures.user.js">Portals pictures dialog</a> for easier portal lookup on IFS decoding</li>
-	<li><a href="dist/highlight-intel-uniques.user.js">Highlight Uniques</a> from intel data</li>
-	<li><a href="dist/player-inventory.user.js">Player Inventory</a> brings the inventory for C.O.R.E user to IITC, and a layer for portal keys</li>
-</ul>
+<dl>
+	<dt><a href="dist/highlight-intel-uniques.user.js">Highlight uniques captured/visited/scanned</a> from intel data</dt>
+	<dd>Since February 2021, the intel provides Portal History. This plugin highilights portals depending on their history. It comes with some variants such as hiding all captured portals, or showing both captured and visited portals with different colors. Consider editing the source to fit your needs.</dd>
+
+	<dt><a href="dist/player-inventory.user.js">Player Inventory</a> (need CORE subscription)</dt>
+	<dd>
+		Use the newly added (Feb 2021) feature for C.O.R.E users to bring the inventory to IITC.
+		This includes a dialog showing your whole inventory, the content of each capsules, the list of your keys.
+		It adds a highlight that shows all portals in view (even not loaded) you have keys.
+		You can export the key numbers to the <a href="https://iitc.app/download_desktop.html#keys_bqy_xelio_release">Keys</a> plugin if available. In the later case, you benefit from the Keys plugin, including <a href="https://iitc.app/download_desktop.html#keys-on-map_bqy_xelio_release">keys on map</a>, and in the <a href="https://iitc.app/download_desktop.html#portals-list_bqy_teo96_release">portals list</a>.
+	</dd>
+
+	<dt><a href="dist/portals-pictures.user.js">Portals pictures dialog</a> for easier portal lookup on IFS decoding</dt>
+	<dd>Add a dialog including the pictures of all visible portals. When clicking one, the portal is selected. The list of picture is sorting according to the number of click so you can find easily a already clicked picture.</dd>
+
+	<dt><a href="dist/labels_layer.user.js">CartoDB and default Ingress map with labels above Ingress layers</a></dt>
+	<dd>Bring the labels (street/city/etc) of CartoDB or default Ingress map above the fields/links and portal.</dd>
+
+	<dt><a href="dist/basemap-google-custom.user.js">Custom Google Map</a></dt>
+	<dd>With the <a href="https://mapstyle.withgoogle.com">Styling Wizard</a> from Google, you can design your own base map and use it in IITC-CE</dd>
+</dl>
 
 Source: <a href="https://github.com/le-jeu/ingress-intel-total-conversion">le-jeu/ingress-intel-total-conversion</a> (see branches)
 
