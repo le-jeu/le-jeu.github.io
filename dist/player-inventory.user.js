@@ -2,7 +2,7 @@
 // @author         jaiperdu
 // @name           IITC plugin: Player Inventory
 // @category       Info
-// @version        0.2.12
+// @version        0.2.13
 // @description    View inventory
 // @id             player-inventory
 // @namespace      https://github.com/IITC-CE/ingress-intel-total-conversion
@@ -19,7 +19,7 @@ if(typeof window.plugin !== 'function') window.plugin = function() {};
 //PLUGIN AUTHORS: writing a plugin outside of the IITC build environment? if so, delete these lines!!
 //(leaving them in place might break the 'About IITC' page or break update checks)
 plugin_info.buildName = 'lejeu';
-plugin_info.dateTimeVersion = '2021-02-15-143758';
+plugin_info.dateTimeVersion = '2021-02-15-190854';
 plugin_info.pluginId = 'player-inventory';
 //END PLUGIN AUTHORS NOTE
 
@@ -631,12 +631,27 @@ const createAllSumTable = function (inventory) {
     const row = L.DomUtil.create('tr', null, table);
 
     const nums = [];
-    for (const k in item.counts) {
-      const num = inventory.countType(type, k);
-      if (num > 0) {
-        const lr = item.leveled ? "L" + k : rarityShort[rarityToInt[k]];
-        const className = (item.leveled ? "level_" : "rarity_") + lr;
-        nums.push(`<span class="${className}">${num} ${lr}</span>`);
+
+    if (type === "PORTAL_LINK_KEY") {
+      const inventoryCount = item.counts["VERY_COMMON"][inventory.name] || 0;
+      let keyLockerCount = 0;
+      for (const name in inventory.capsules) {
+        const capsule = inventory.capsules[name];
+        if (capsule.type === "KEY_CAPSULE")
+          keyLockerCount += capsule.size;
+      }
+      const otherCount = total - inventoryCount - keyLockerCount;
+      nums.push(`<span class="level_L1">${inventory.name}: ${inventoryCount}</span>`);
+      nums.push(`<span class="level_L1">Key Lockers: ${keyLockerCount}</span>`);
+      nums.push(`<span class="level_L1">Other: ${otherCount}</span>`);
+    } else {
+      for (const k in item.counts) {
+        const num = inventory.countType(type, k);
+        if (num > 0) {
+          const lr = item.leveled ? "L" + k : rarityShort[rarityToInt[k]];
+          const className = (item.leveled ? "level_" : "rarity_") + lr;
+          nums.push(`<span class="${className}">${num} ${lr}</span>`);
+        }
       }
     }
 
