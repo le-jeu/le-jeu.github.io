@@ -2,7 +2,7 @@
 // @author         jaiperdu
 // @name           IITC plugin: Player Inventory
 // @category       Info
-// @version        0.2.9
+// @version        0.2.11
 // @description    View inventory
 // @id             player-inventory
 // @namespace      https://github.com/IITC-CE/ingress-intel-total-conversion
@@ -19,7 +19,7 @@ if(typeof window.plugin !== 'function') window.plugin = function() {};
 //PLUGIN AUTHORS: writing a plugin outside of the IITC build environment? if so, delete these lines!!
 //(leaving them in place might break the 'About IITC' page or break update checks)
 plugin_info.buildName = 'lejeu';
-plugin_info.dateTimeVersion = '2021-02-13-232011';
+plugin_info.dateTimeVersion = '2021-02-15-143103';
 plugin_info.pluginId = 'player-inventory';
 //END PLUGIN AUTHORS NOTE
 
@@ -103,6 +103,7 @@ class Inventory {
   constructor(name) {
     this.name = name;
     this.keys = new Map(); // guid => {counts: caps => count}
+    this.medias = new Map();
     this.clear();
   }
 
@@ -172,7 +173,18 @@ class Inventory {
   }
 
   addMedia(media) {
-    //XXX
+    if (!this.medias.has(media.mediaId))
+      this.medias.set(media.mediaId, {
+        mediaId: media.mediaId,
+        name: media.name,
+        url: media.url,
+        count: new Map(),
+        total: 0,
+      });
+    const current = this.medias.get(media.mediaId);
+    const entry = current.count.get(media.capsule) || 0;
+    current.count.set(media.capsule, entry + (media.count || 1));
+    current.total += (media.count || 1);
   }
 
   countKey(guid) {
@@ -472,6 +484,7 @@ const getPortalLink = function(key) {
 }
 
 const STORE_KEY = "plugin-player-inventory";
+const SETTINGS_KEY = "plugin-player-inventory-settings";
 
 const loadFromLocalStorage = function () {
   const store = localStorage[STORE_KEY];
@@ -479,6 +492,8 @@ const loadFromLocalStorage = function () {
     try {
       const data = JSON.parse(store);
       plugin.inventory = parseInventory("⌂", data.raw);
+      plugin.lastRefresh = data.date;
+      window.runHooks("pluginInventoryRefresh", {inventory: plugin.inventory});
     } catch (e) {console.log(e);}
   }
 }
@@ -491,16 +506,34 @@ const storeToLocalStorage = function (data) {
   localStorage[STORE_KEY] = JSON.stringify(store);
 }
 
+const loadSettings = function () {
+  const settings = localStorage[SETTINGS_KEY];
+  if (settings) {
+    try {
+      const data = JSON.parse(settings);
+      $.extend(plugin.settings, data);
+    } catch (e) {console.log(e);}
+  }
+}
+
+const storeSettings = function () {
+  localStorage[SETTINGS_KEY] = JSON.stringify(plugin.settings);
+}
+
 const handleInventory = function (data) {
   if (data.result.length > 0) {
     plugin.inventory = parseInventory("⌂", data.result);
     storeToLocalStorage(data.result);
+    window.runHooks("pluginInventoryRefresh", {inventory: plugin.inventory});
   } else {
-    console.log("Inventory empty, probably hitting rate limit");
+    alert("Inventory empty, probably hitting rate limit, try again later");
   }
+  autoRefresh();
 }
 
-const handleError = function () {};
+const handleError = function () {
+  autoRefresh();
+};
 
 const getInventory = function () {
   window.postAjax('getInventory', {lastQueryTimestamp:0}, handleInventory, handleError);
@@ -516,7 +549,7 @@ const getSubscriptionStatus = function () {
 };
 
 const injectKeys = function(data) {
-  if (window._current_highlighter !== "Inventory keys")
+  if (!plugin.isHighlighActive)
     return;
 
   const bounds = window.map.getBounds();
@@ -567,26 +600,6 @@ const createPopup = function (guid) {
       .setContent('<div class="inventory-keys">' + text + '</div>').openOn(window.map);
   }
 }
-
-const updateLayer = function () {
-  plugin.layer.clearLayers();
-
-  for (const [guid, key] of plugin.inventory.keys) {
-    const marker = L.circleMarker(key.latLng, {
-      color: "red",
-      radius: 3,
-    });
-    marker.on('click', function() {
-      marker.openPopup();
-      renderPortalDetails(guid);
-    });
-
-    const count = Array.from(key.count).map(([name, count]) => `<strong>${name}</strong>: ${count}`).join('<br/>');
-    marker.bindPopup('<div class="inventory-keys">' + count + '</div>');
-    marker.addTo(plugin.layer);
-  }
-}
-
 
 const createAllTable = function (inventory) {
   const table = L.DomUtil.create("table");
@@ -648,10 +661,23 @@ const createKeysTable = function (inventory) {
   return table;
 }
 
+const createMediaTable = function (inventory) {
+  const table = L.DomUtil.create("table");
+  const medias = [...inventory.medias.values()].sort((a,b) => a.name.localeCompare(b.name));
+  for (const media of medias) {
+    const counts = Array.from(media.count).map(([name, count]) => `${name}: ${count}`).join(', ');
+
+    L.DomUtil.create('tr', 'level_L1', table).innerHTML =
+        `<td><a title="${counts}">${media.total}</a></td>`
+      + `<td><a href="${media.url}">${media.name}</a>`;
+  }
+  return table;
+}
+
 const createCapsuleTable = function (inventory, capsule) {
   const table = L.DomUtil.create("table");
-  for (const guid in capsule.keys) {
-    const item = capsule.keys[guid];
+  const keys = Object.values(capsule.keys).sort((a,b) => a.title.localeCompare(b.title));
+  for (const item of keys) {
     const a = getPortalLink(item);
     const total = item.count;
 
@@ -660,12 +686,13 @@ const createCapsuleTable = function (inventory, capsule) {
     L.DomUtil.create('td', null, row);
     L.DomUtil.create('td', null, row).appendChild(a);
   }
-  for (const id in capsule.medias) {
-    const item = capsule.medias[id];
+  const medias = Object.values(capsule.medias).sort((a,b) => a.name.localeCompare(b.name));
+  for (const item of medias) {
     L.DomUtil.create('tr', 'level_L1', table).innerHTML = `<td>${item.count}</td><td>M</td><td><a href="${item.url}">${item.name}</a>`;
   }
-  for (const type in capsule.items) {
+  for (const type in itemTypes) {
     const item = capsule.items[type];
+    if (!item) continue;
     const name = itemTypes[type];
     for (const k in item.count) {
       const lr = item.leveled ? "L" + k : rarityShort[rarityToInt[k]];
@@ -676,7 +703,7 @@ const createCapsuleTable = function (inventory, capsule) {
   return table;
 }
 
-const displayInventory = function (inventory) {
+const buildInventoryHTML = function (inventory) {
   const container = L.DomUtil.create("div", "container");
 
   const sumHeader = L.DomUtil.create("b", null, container);
@@ -694,103 +721,222 @@ const displayInventory = function (inventory) {
   const keys = L.DomUtil.create("div", "keys", container);
   keys.appendChild(createKeysTable(inventory));
 
-  for (const name in inventory.capsules) {
-    const capsule = inventory.capsules[name];
-    if (capsule.size > 0) {
-      L.DomUtil.create("b", null, container).textContent = `${itemTypes[capsule.type]}: ${name} (${capsule.size})`;
-      L.DomUtil.create("div", "capsule", container).appendChild(createCapsuleTable(inventory, capsule));
+  if (inventory.medias.size > 0) {
+    const mediasHeader = L.DomUtil.create("b", null, container);
+    mediasHeader.textContent = "Medias";
+    const medias = L.DomUtil.create("div", "medias", container);
+    medias.appendChild(createMediaTable(inventory));
+  }
+
+  const capsulesName = Object.keys(inventory.capsules).sort();
+  const keyLockers = capsulesName.filter((name) => inventory.capsules[name].type === "KEY_CAPSULE");
+  const quantums = capsulesName.filter((name) => inventory.capsules[name].type === "INTEREST_CAPSULE");
+  const commonCapsules = capsulesName.filter((name) => inventory.capsules[name].type === "CAPSULE");
+  for (const names of [keyLockers, quantums, commonCapsules]) {
+    for (const name of names) {
+      const capsule = inventory.capsules[name];
+      if (capsule.size > 0) {
+        L.DomUtil.create("b", null, container).textContent = `${itemTypes[capsule.type]}: ${name} (${capsule.size})`;
+        L.DomUtil.create("div", "capsule", container).appendChild(createCapsuleTable(inventory, capsule));
+      }
     }
   }
 
   $(container).accordion({
       header: 'b',
-      heightStyle: 'fill'
+      heightStyle: 'fill',
+      collapsible: true,
   });
 
-  if (window.useAndroidPanes()) {
-    plugin.dialog = L.DomUtil.create('div', 'mobile', document.body)
-    plugin.dialog.appendChild(container);
-    plugin.dialog.id = 'dialog-inventory';
-  } else {
-    plugin.dialog = dialog({
-      title: 'Inventory',
-      id: 'inventory',
-      html: container,
-      width: 'auto',
-      height: 500,
-    });
-  }
+  return container;
 }
 
-var setup = function () {
+const fillPane = function (inventory) {
+  const oldContainer = plugin.pane.querySelector('.container');
+  if (oldContainer) plugin.pane.removeChild(oldContainer);
+  plugin.pane.appendChild(buildInventoryHTML(inventory));
+}
+
+const displayInventory = function (inventory) {
+  const container = buildInventoryHTML(inventory);
+
+  plugin.dialog = dialog({
+    title: 'Inventory',
+    id: 'inventory',
+    html: container,
+    width: 'auto',
+    height: '500',
+    classes: {
+      'ui-dialog-content': 'inventory-box',
+    },
+    buttons: {
+      "Refresh": refreshInventory,
+      "Options": displayOpt,
+    }
+  });
+}
+
+const refreshInventory = function () {
+  clearTimeout(plugin.autoRefreshTimer);
+  getSubscriptionStatus();
+}
+
+const autoRefresh = function () {
+  if (!plugin.settings.autoRefreshActive) return;
+  plugin.autoRefreshTimer = setTimeout(refreshInventory, plugin.settings.autoRefreshDelay * 60 * 1000);
+}
+
+const stopAutoRefresh = function () {
+  clearTimeout(plugin.autoRefreshTimer);
+}
+
+const exportToKeys = function () {
+  if (!window.plugin.keys) return;
+  [window.plugin.keys.KEY, window.plugin.keys.UPDATE_QUEUE].forEach((mapping) => {
+    const data = {};
+    for (const [guid, key] of plugin.inventory.keys) {
+      data[guid] = key.total;
+    }
+    window.plugin.keys[mapping.field] = data;
+    window.plugin.keys.storeLocal(mapping);
+  });
+  window.runHooks('pluginKeysRefreshAll');
+  window.plugin.keys.delaySync();
+}
+
+const displayOpt = function () {
+  const container = L.DomUtil.create("div", "container");
+
+  const popupLabel = L.DomUtil.create('label', null, container);
+  popupLabel.textContent = "Keys popups";
+  popupLabel.htmlFor = "plugin-player-inventory-popup-enable"
+  const popupCheck = L.DomUtil.create('input', null, container);
+  popupCheck.type = 'checkbox';
+  popupCheck.checked = plugin.settings.popupEnable;
+  popupCheck.id = 'plugin-player-inventory-popup-enable';
+  L.DomEvent.on(popupCheck, "change", (ev) => {
+    plugin.settings.popupEnable = popupCheck.checked === 'true' || (popupCheck.checked === 'false' ? false : popupCheck.checked);
+    storeSettings();
+  });
+
+  const refreshLabel = L.DomUtil.create('label', null, container);
+  refreshLabel.textContent = "Auto-refresh";
+  refreshLabel.htmlFor = "plugin-player-inventory-autorefresh-enable"
+  const refreshCheck = L.DomUtil.create('input', null, container);
+  refreshCheck.type = 'checkbox';
+  refreshCheck.checked = plugin.settings.autoRefreshActive;
+  refreshCheck.id = 'plugin-player-inventory-autorefresh-enable';
+  L.DomEvent.on(refreshCheck, "change", (ev) => {
+    plugin.settings.autoRefreshActive = refreshCheck.checked === 'true' || (refreshCheck.checked === 'false' ? false : refreshCheck.checked);
+    if (plugin.settings.autoRefreshActive) {
+      autoRefresh();
+    } else {
+      stopAutoRefresh();
+    }
+    storeSettings();
+  });
+
+  const refreshDelayLabel = L.DomUtil.create('label', null, container);
+  refreshDelayLabel.textContent = "Refresh delay (min)";
+  const refreshDelay = L.DomUtil.create('input', null, container);
+  refreshDelay.type = 'number';
+  refreshDelay.value = plugin.settings.autoRefreshDelay;
+  L.DomEvent.on(refreshDelay, "change", (ev) => {
+    plugin.settings.autoRefreshDelay = +refreshDelay.value > 0 ? +refreshDelay.value : 1;
+    refreshDelay.value = plugin.settings.autoRefreshDelay;
+    storeSettings();
+  });
+
+  // sync keys with the keys plugin
+  if (window.plugin.keys) {
+    const button = L.DomUtil.create("button", null, container);
+    button.textContent = "Export to keys plugin";
+    L.DomEvent.on(button, 'click', exportToKeys);
+  }
+
+  dialog({
+    title: 'Inventory Opt',
+    id: 'inventory-opt',
+    html: container,
+    width: 'auto',
+    height: 'auto',
+  });
+}
+
+const setupCSS = function () {
   $('<style>').html('\
-#dialog-inventory {\
-  padding-right: 16px;\
-}\
-\
-#dialog-inventory .container {\
+.inventory-box .container {\
 	width: max-content;\
 }\
 \
-#dialog-inventory .ui-accordion-header, #inventory .ui-accordion-content {\
+.inventory-box .ui-accordion-header {\
+	color: #ffce00;\
+  background: rgba(0, 0, 0, 0.7);\
+}\
+\
+.inventory-box .ui-accordion-header, .inventory-box .ui-accordion-content {\
 	border: 1px solid rgba(255,255,255,.2);\
 	margin-top: -1px;\
 	display: block;\
-  background: rgba(0, 0, 0, 0.7);\
   line-height: 1.4rem;\
 }\
 \
-#dialog-inventory .ui-accordion-header:before {\
+.inventory-box .ui-accordion-header:before {\
 	font-size: 18px;\
 	margin-right: 2px;\
 	content: "⊞";\
 }\
 \
-#dialog-inventory .ui-accordion-header-active:before {\
+.inventory-box .ui-accordion-header-active:before {\
 	content: "⊟";\
 }\
 \
-#dialog-inventory table {\
+.inventory-box table {\
 	width: 100%;\
 }\
 \
-#dialog-inventory table tr {\
+.inventory-box table tr {\
   background: rgba(0, 0, 0, 0.6);\
 }\
 \
-#dialog-inventory table tr:nth-child(2n + 1) {\
+.inventory-box table tr:nth-child(2n + 1) {\
   background: rgba(0, 0, 0, 0.3);\
 }\
 \
-#dialog-inventory .sum tr td:nth-child(2),\
-#dialog-inventory .all tr td:first-child,\
-#dialog-inventory .capsule tr td:first-child,\
-#dialog-inventory .keys tr td:first-child {\
+.inventory-box tr td:first-child {\
   text-align: right;\
 }\
 \
-#dialog-inventory .all tr td:nth-child(2),\
-#dialog-inventory .sum tr td:nth-child(2),\
-#dialog-inventory .capsule tr td:nth-child(2) {\
+.inventory-box .sum tr td:first-child {\
+  text-align: left;\
+}\
+\
+.inventory-box tr td:nth-child(2) {\
   text-align: center;\
 }\
 \
-#dialog-inventory .all tr td:last-child,\
-#dialog-inventory .keys tr td:last-child,\
-#dialog-inventory .capsule tr td:last-child {\
+.inventory-box .medias tr td:last-child,\
+.inventory-box .keys tr td:last-child {\
+  text-align: left;\
+}\
+\
+.inventory-box .all tr td:last-child,\
+.inventory-box .keys tr td:last-child,\
+.inventory-box .medias tr td:last-child,\
+.inventory-box .capsule tr td:last-child {\
   width: 100%;\
 }\
 \
-#dialog-inventory td {\
+.inventory-box td {\
 	padding-left: .3rem;\
 	padding-right: .3rem;\
 }\
 \
-#dialog-inventory .keys td {\
-	line-height: 1.2rem;\
+#dialog-inventory.inventory-box {\
+  padding-right: 16px;\
 }\
 \
-#dialog-inventory.mobile {\
+.inventory-box.mobile {\
 	position: absolute;\
 	top: 0;\
 	left: 0;\
@@ -799,15 +945,35 @@ var setup = function () {
 	overflow: auto;\
 	padding: 0;\
 }\
-#dialog-inventory.mobile .container {\
+.inventory-box.mobile .container {\
 	width: unset;\
+}\
+\
+.inventory-box.mobile button {\
+	width: 100%;\
 }\
 \
 /* popup */\
 .inventory-keys {\
   width: max-content;\
 }\
-').appendTo('head');
+\
+.inventory-box-opt .container {\
+  display: grid;\
+  grid-template-columns: auto auto;\
+  grid-gap: .5em\
+}\
+\
+.inventory-box-opt button {\
+  grid-column: 1/3;\
+  padding: .3rem 1em;\
+}\
+\
+.inventory-box-opt input {\
+  margin-left: auto;\
+  margin-top: auto;\
+  margin-bottom: auto;\
+}').appendTo('head');
   let colorStyle = "";
   window.COLORS_LVL.forEach((c,i) => {
     colorStyle += `.level_L${i}{ color: ${c} }`;
@@ -817,42 +983,33 @@ var setup = function () {
       colorStyle += `.rarity_${rarityShort[i]} { color: ${window.COLORS_MOD[r]}}`;
   });
   $('<style>').html(colorStyle).appendTo('head');
+}
 
-  plugin.hasActiveSubscription = false;
-
-  plugin.inventory = new Inventory();
-  plugin.layer = new L.LayerGroup();
-
-  //window.addHook('mapDataRefreshEnd', updateLayer);
-
-  //window.addLayerGroup('Inventory Keys', plugin.layer, true);
-  window.addPortalHighlighter('Inventory keys', portalKeyHighlight);
-
-  window.addHook('portalSelected', (data) => {
-    //{selectedPortalGuid: guid, unselectedPortalGuid: oldPortalGuid}
-    if (data.selectedPortalGuid && data.selectedPortalGuid !== data.unselectedPortalGuid) {
-      const total = plugin.inventory.countKey(data.selectedPortalGuid);
-      if (total > 0) {
-        createPopup(data.selectedPortalGuid);
-      }
-    }
-  });
-
-  plugin.updateLayer = updateLayer;
-  plugin.parseInventory = parseInventory;
-  plugin.displayInventory = displayInventory;
-
+const setupDisplay = function () {
   plugin.dialog = null;
 
   if (window.useAndroidPanes()) {
     android.addPane('playerInventory', 'Inventory', 'ic_action_view_as_list');
     addHook('paneChanged', function (pane) {
       if (pane === 'playerInventory') {
-        displayInventory(plugin.inventory);
-      } else if (plugin.dialog) {
-        plugin.dialog.remove();
+        plugin.pane.style.display = "";
+      } else if (plugin.pane) {
+        plugin.pane.style.display = "none";
       }
     });
+    plugin.pane = L.DomUtil.create('div', 'inventory-box mobile', document.body);
+    plugin.pane.id = 'pane-inventory';
+    plugin.pane.style.display = "none";
+
+    const refreshButton = L.DomUtil.create('button', null, plugin.pane);
+    refreshButton.textContent = 'Refresh';
+    L.DomEvent.on(refreshButton, 'click', refreshInventory);
+
+    $('<a>')
+      .html('Inventory Opt')
+      .attr('title','Inventory options')
+      .click(displayOpt)
+      .appendTo('#toolbox');
   } else {
     $('<a>')
       .html('Inventory')
@@ -860,9 +1017,63 @@ var setup = function () {
       .click(() => displayInventory(plugin.inventory))
       .appendTo('#toolbox');
   }
+}
+
+var setup = function () {
+  // Dummy inventory
+  plugin.inventory = new Inventory();
+
+  plugin.hasActiveSubscription = false;
+  plugin.isHighlighActive = false;
+
+  plugin.lastRefresh = 0;
+  plugin.autoRefreshTimer = null;
+
+  plugin.settings = {
+    autoRefreshActive: false,
+    popupEnable: true,
+    autoRefreshDelay: 10,
+  }
+
+  loadSettings();
+
+  setupCSS();
+  setupDisplay();
+
+  plugin.getSubscriptionStatus = getSubscriptionStatus;
+
+  plugin.highlighter = {
+    highlight: portalKeyHighlight,
+    setSelected: function (selected) {
+      plugin.isHighlighActive = selected;
+    },
+  }
+  window.addPortalHighlighter('Inventory keys', plugin.highlighter);
+
+  window.addHook('pluginInventoryRefresh', (data) => {
+    if (plugin.dialog) {
+      plugin.dialog.html(buildInventoryHTML(data.inventory));
+    }
+    if (plugin.pane) {
+      fillPane(data.inventory);
+    }
+  })
 
   window.addHook('mapDataEntityInject', injectKeys);
-  window.addHook('iitcLoaded', getSubscriptionStatus);
+  window.addHook('iitcLoaded', () => {
+    if (plugin.lastRefresh + plugin.settings.autoRefreshDelay * 60 * 1000 < Date.now())
+      refreshInventory();
+  });
+  window.addHook('portalSelected', (data) => {
+    //{selectedPortalGuid: guid, unselectedPortalGuid: oldPortalGuid}
+    if (!plugin.settings.popupEnable) return;
+    if (data.selectedPortalGuid && data.selectedPortalGuid !== data.unselectedPortalGuid) {
+      const total = plugin.inventory.countKey(data.selectedPortalGuid);
+      if (total > 0) {
+        createPopup(data.selectedPortalGuid);
+      }
+    }
+  });
 
   loadFromLocalStorage();
 };
