@@ -2,7 +2,7 @@
 // @author         jaiperdu
 // @name           IITC plugin: Player Inventory
 // @category       Info
-// @version        0.2.16
+// @version        0.2.17
 // @description    View inventory
 // @id             player-inventory
 // @namespace      https://github.com/IITC-CE/ingress-intel-total-conversion
@@ -19,7 +19,7 @@ if(typeof window.plugin !== 'function') window.plugin = function() {};
 //PLUGIN AUTHORS: writing a plugin outside of the IITC build environment? if so, delete these lines!!
 //(leaving them in place might break the 'About IITC' page or break update checks)
 plugin_info.buildName = 'lejeu';
-plugin_info.dateTimeVersion = '2021-02-16-203117';
+plugin_info.dateTimeVersion = '2021-03-08-212319';
 plugin_info.pluginId = 'player-inventory';
 //END PLUGIN AUTHORS NOTE
 
@@ -870,6 +870,18 @@ const displayOpt = function () {
 
   // sync keys with the keys plugin
   if (window.plugin.keys) {
+
+    const syncLabel = L.DomUtil.create('label', null, container);
+    syncLabel.textContent = "Auto-sync with Keys";
+    syncLabel.htmlFor = "plugin-player-inventory-autosync-enable"
+    const syncCheck = L.DomUtil.create('input', null, container);
+    syncCheck.type = 'checkbox';
+    syncCheck.checked = plugin.settings.autoSyncKeys;
+    syncCheck.id = 'plugin-player-inventory-autosync-enable';
+    L.DomEvent.on(syncCheck, "change", (ev) => {
+      plugin.settings.autoSyncKeys = syncCheck.checked === 'true' || (syncCheck.checked === 'false' ? false : syncCheck.checked);
+      storeSettings();
+    });
     const button = L.DomUtil.create("button", null, container);
     button.textContent = "Export to keys plugin";
     L.DomEvent.on(button, 'click', exportToKeys);
@@ -1059,7 +1071,8 @@ var setup = function () {
   plugin.settings = {
     autoRefreshActive: false,
     popupEnable: true,
-    autoRefreshDelay: 10,
+    autoRefreshDelay: 30,
+    autoSyncKeys: false,
   }
 
   loadSettings();
@@ -1078,6 +1091,9 @@ var setup = function () {
   window.addPortalHighlighter('Inventory keys', plugin.highlighter);
 
   window.addHook('pluginInventoryRefresh', (data) => {
+    if (plugin.settings.autoSyncKeys) {
+      exportToKeys();
+    }
     if (plugin.dialog) {
       plugin.dialog.html(buildInventoryHTML(data.inventory));
     }
