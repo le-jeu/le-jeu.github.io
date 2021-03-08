@@ -1,0 +1,40 @@
+* {
+  --bgcolor: #eee;
+  --textcolor: #333;
+  --linkcolor: #07a;
+  --vlinkcolor: #079;
+}
+
+@media (prefers-color-scheme: dark) {
+  * {
+    --textcolor: #dadada;
+    --bgcolor: #141414;
+    --linkcolor: #ffc400;
+    --vlinkcolor: #e80;
+  }
+}
+
+body {
+  margin:40px auto;
+  max-width:750px;
+  line-height:1.6;
+  font-family: Monaco, Menlo, Consolas, "Courier New", monospace;
+  font-size:16px;
+  color: var(--textcolor);
+  background: var(--bgcolor);
+  padding: 1em;
+  position: relative;
+}
+
+h1,h2,h3 {
+  line-height:1.2
+}
+
+a {
+  color: var(--linkcolor);
+  text-decoration: none
+}
+
+a:visited {
+  color: var(--vlinkcolor)
+}
