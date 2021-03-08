@@ -2,7 +2,7 @@
 // @author         jaiperdu
 // @name           IITC plugin: Player Inventory
 // @category       Info
-// @version        0.2.15
+// @version        0.2.16
 // @description    View inventory
 // @id             player-inventory
 // @namespace      https://github.com/IITC-CE/ingress-intel-total-conversion
@@ -278,7 +278,7 @@ const parseMod = function (mod) {
 */
 const parseMedia = function (data, media) {
   data.mediaId = media.storyItem.mediaId;
-  data.name = media.storyItem.shortDescription;
+  data.name = media.storyItem.shortDescription || '[MISSING DESC]';
   data.url = media.storyItem.primaryUrl;
   return data;
 }
@@ -320,7 +320,7 @@ const parseLevelItem = function (obj) {
 */
 const parsePortalKey = function (data, key) {
   data.guid = key.portalCoupler.portalGuid;
-  data.title = key.portalCoupler.portalTitle;
+  data.title = key.portalCoupler.portalTitle || '[MISSING TITLE]';
   data.latLng = parsePortalLocation(key.portalCoupler.portalLocation);
   data.address = key.portalCoupler.portalAddress;
   return data;
