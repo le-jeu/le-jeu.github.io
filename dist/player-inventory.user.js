@@ -2,7 +2,7 @@
 // @author         jaiperdu
 // @name           IITC plugin: Player Inventory
 // @category       Info
-// @version        0.2.18
+// @version        0.2.19
 // @description    View inventory
 // @id             player-inventory
 // @namespace      https://github.com/IITC-CE/ingress-intel-total-conversion
@@ -492,7 +492,6 @@ function getPortalLink(key) {
 }
 
 function localeCompare(a,b) {
-  if (!a || !b) console.trace(a,b);
   if (typeof a !== "string") a = '';
   if (typeof b !== "string") b = '';
   return a.localeCompare(b)
