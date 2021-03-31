@@ -2,7 +2,7 @@
 // @author         jaiperdu
 // @name           IITC plugin: Player Inventory
 // @category       Info
-// @version        0.2.19
+// @version        0.2.20
 // @description    View inventory
 // @id             player-inventory
 // @namespace      https://github.com/IITC-CE/ingress-intel-total-conversion
@@ -19,7 +19,7 @@ if(typeof window.plugin !== 'function') window.plugin = function() {};
 //PLUGIN AUTHORS: writing a plugin outside of the IITC build environment? if so, delete these lines!!
 //(leaving them in place might break the 'About IITC' page or break update checks)
 plugin_info.buildName = 'lejeu';
-plugin_info.dateTimeVersion = '2021-03-11-085025';
+plugin_info.dateTimeVersion = '2021-03-31-191655';
 plugin_info.pluginId = 'player-inventory';
 //END PLUGIN AUTHORS NOTE
 
@@ -831,6 +831,33 @@ function exportToKeys() {
   window.plugin.keys.delaySync();
 }
 
+function exportToClipboard() {
+  const data = [];
+  for (const [guid, key] of plugin.inventory.keys) {
+    for (const [capsule, num] of key.count) {
+      data.push([key.title, key.latLng[0], key.latLng[1], capsule, num].join('\t'));
+    }
+  }
+  const shared = data.join('\n');
+
+  if(typeof android !== 'undefined' && android && android.shareString)
+    android.shareString(shared);
+  else {
+    const content = L.DomUtil.create('textarea');
+    content.textContent = shared;
+    L.DomEvent.on(content, 'click', () => {
+      content.select();
+    });
+    dialog({
+      title: 'Keys',
+      html: content,
+      width: 'auto',
+      height: 'auto',
+    });
+  }
+
+}
+
 function displayOpt() {
   const container = L.DomUtil.create("div", "container");
 
@@ -891,6 +918,12 @@ function displayOpt() {
     const button = L.DomUtil.create("button", null, container);
     button.textContent = "Export to keys plugin";
     L.DomEvent.on(button, 'click', exportToKeys);
+  }
+
+  {
+    const button = L.DomUtil.create("button", null, container);
+    button.textContent = "Export to keys to clipboard";
+    L.DomEvent.on(button, 'click', exportToClipboard);
   }
 
   dialog({
