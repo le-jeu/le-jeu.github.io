@@ -2,7 +2,7 @@
 // @author         jaiperdu
 // @name           IITC plugin: Player Inventory
 // @category       Info
-// @version        0.2.21
+// @version        0.2.22
 // @description    View inventory
 // @id             player-inventory
 // @namespace      https://github.com/IITC-CE/ingress-intel-total-conversion
@@ -19,7 +19,7 @@ if(typeof window.plugin !== 'function') window.plugin = function() {};
 //PLUGIN AUTHORS: writing a plugin outside of the IITC build environment? if so, delete these lines!!
 //(leaving them in place might break the 'About IITC' page or break update checks)
 plugin_info.buildName = 'lejeu';
-plugin_info.dateTimeVersion = '2021-03-31-193337';
+plugin_info.dateTimeVersion = '2021-04-04-191533';
 plugin_info.pluginId = 'player-inventory';
 //END PLUGIN AUTHORS NOTE
 
@@ -500,6 +500,67 @@ function localeCompare(a,b) {
 const STORE_KEY = "plugin-player-inventory";
 const SETTINGS_KEY = "plugin-player-inventory-settings";
 
+function openIndexedDB() {
+  const rq = window.indexedDB.open("player-inventory", 1);
+  rq.onupgradeneeded = function(event) {
+    const db = event.target.result;
+    db.createObjectStore("inventory", { autoIncrement: true });
+  };
+  return rq;
+}
+
+function loadFromIndexedDB() {
+  if (!window.indexedDB) return loadFromLocalStorage();
+  const rq = openIndexedDB();
+  rq.onerror = function (event) {
+    loadFromLocalStorage();
+  };
+  rq.onsuccess = function (event) {
+    const db = event.target.result;
+    const tx = db.transaction(["inventory"], "readonly");
+    const store = tx.objectStore("inventory");
+    store.getAll().onsuccess = function (event) {
+      const r = event.target.result;
+      if (r.length > 0) {
+        const data = r[r.length-1];
+        plugin.inventory = parseInventory("⌂", data.raw);
+        plugin.lastRefresh = data.date;
+        autoRefresh();
+        window.runHooks("pluginInventoryRefresh", {inventory: plugin.inventory});
+      } else {
+        loadFromLocalStorage();
+      }
+    }
+    db.close();
+  };
+}
+
+function storeToIndexedDB(data) {
+  if (!window.indexedDB) return storeToLocalStorage(data);
+  const rq = openIndexedDB();
+  rq.onerror = function (event) {
+    storeToLocalStorage(data);
+  };
+  rq.onsuccess = function (event) {
+    const db = event.target.result;
+    const tx = db.transaction(["inventory"], "readwrite");
+    const store = tx.objectStore("inventory");
+    store.clear().onsuccess = function (event) {
+      const rq = store.add({
+        raw: data,
+        date: Date.now(),
+      });
+    };
+    tx.oncomplete = function () {
+      delete localStorage[STORE_KEY];
+    }
+    tx.onerror = function () {
+      storeToLocalStorage(data);
+    }
+    db.close();
+  };
+}
+
 function loadFromLocalStorage() {
   const store = localStorage[STORE_KEY];
   if (store) {
@@ -507,6 +568,7 @@ function loadFromLocalStorage() {
       const data = JSON.parse(store);
       plugin.inventory = parseInventory("⌂", data.raw);
       plugin.lastRefresh = data.date;
+      autoRefresh();
       window.runHooks("pluginInventoryRefresh", {inventory: plugin.inventory});
     } catch (e) {console.log(e);}
   }
@@ -537,7 +599,7 @@ function storeSettings() {
 function handleInventory(data) {
   if (data.result.length > 0) {
     plugin.inventory = parseInventory("⌂", data.result);
-    storeToLocalStorage(data.result);
+    storeToIndexedDB(data.result);
     window.runHooks("pluginInventoryRefresh", {inventory: plugin.inventory});
   } else {
     alert("Inventory empty, probably hitting rate limit, try again later");
@@ -1105,7 +1167,7 @@ function setup() {
   plugin.hasActiveSubscription = false;
   plugin.isHighlighActive = false;
 
-  plugin.lastRefresh = 0;
+  plugin.lastRefresh = Date.now();
   plugin.autoRefreshTimer = null;
 
   plugin.settings = {
@@ -1143,13 +1205,6 @@ function setup() {
   })
 
   window.addHook('mapDataEntityInject', injectKeys);
-  window.addHook('iitcLoaded', () => {
-    const delay = plugin.lastRefresh + plugin.settings.autoRefreshDelay * 60 * 1000 - Date.now();
-    if (delay < 0)
-      refreshInventory();
-    else
-      plugin.autoRefreshTimer = setTimeout(refreshInventory, delay);
-  });
   window.addHook('portalSelected', (data) => {
     //{selectedPortalGuid: guid, unselectedPortalGuid: oldPortalGuid}
     if (!plugin.settings.popupEnable) return;
@@ -1161,7 +1216,7 @@ function setup() {
     }
   });
 
-  loadFromLocalStorage();
+  loadFromIndexedDB();
 }
 
 setup.info = plugin_info; //add the script info data to the function as a property
