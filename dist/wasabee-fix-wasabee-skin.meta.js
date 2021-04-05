@@ -2,7 +2,7 @@
 // @id 	 wasabee-fix-wasabee-skin
 // @name 	 Wasabee Skin: Wasabee Fix
 // @namespace 	 https://wasabee.rocks/
-// @version 	 0.0.6
+// @version 	 0.0.7
 // @updateURL 	 https://le-jeu.github.io/dist/wasabee-fix-wasabee-skin.meta.js
 // @downloadURL 	 https://le-jeu.github.io/dist/wasabee-fix-wasabee-skin.user.js
 // @description 	 Some UI tweaks for Wasabee
