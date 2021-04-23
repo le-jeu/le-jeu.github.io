@@ -2,7 +2,7 @@
 // @author         jaiperdu
 // @name           IITC plugin: Player Inventory
 // @category       Info
-// @version        0.2.24
+// @version        0.2.25
 // @description    View inventory
 // @id             player-inventory
 // @namespace      https://github.com/IITC-CE/ingress-intel-total-conversion
@@ -19,7 +19,7 @@ if(typeof window.plugin !== 'function') window.plugin = function() {};
 //PLUGIN AUTHORS: writing a plugin outside of the IITC build environment? if so, delete these lines!!
 //(leaving them in place might break the 'About IITC' page or break update checks)
 plugin_info.buildName = 'lejeu';
-plugin_info.dateTimeVersion = '2021-04-23-213323';
+plugin_info.dateTimeVersion = '2021-04-23-214614';
 plugin_info.pluginId = 'player-inventory';
 //END PLUGIN AUTHORS NOTE
 
@@ -1246,7 +1246,7 @@ function setup() {
       const key = plugin.inventory.keys.get(data.guid);
       const capsules = Array.from(key.count.keys());
       $("#randdetails")
-        .append(`<tr><td>${total}</td><td>Keys</td><td>Capsules</td><td style="white-space: normal">${capsules.join(' ')}</td></tr>`);
+        .append(`<tr><td>${total}</td><th>Keys</th><th>Capsules</th><td style="white-space: normal">${capsules.join(' ')}</td></tr>`);
     }
   });
 
