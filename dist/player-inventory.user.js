@@ -2,7 +2,7 @@
 // @author         jaiperdu
 // @name           IITC plugin: Player Inventory
 // @category       Info
-// @version        0.2.22
+// @version        0.2.24
 // @description    View inventory
 // @id             player-inventory
 // @namespace      https://github.com/IITC-CE/ingress-intel-total-conversion
@@ -19,7 +19,7 @@ if(typeof window.plugin !== 'function') window.plugin = function() {};
 //PLUGIN AUTHORS: writing a plugin outside of the IITC build environment? if so, delete these lines!!
 //(leaving them in place might break the 'About IITC' page or break update checks)
 plugin_info.buildName = 'lejeu';
-plugin_info.dateTimeVersion = '2021-04-04-191533';
+plugin_info.dateTimeVersion = '2021-04-23-213323';
 plugin_info.pluginId = 'player-inventory';
 //END PLUGIN AUTHORS NOTE
 
@@ -599,6 +599,7 @@ function storeSettings() {
 function handleInventory(data) {
   if (data.result.length > 0) {
     plugin.inventory = parseInventory("⌂", data.result);
+    plugin.lastRefresh = Date.now();
     storeToIndexedDB(data.result);
     window.runHooks("pluginInventoryRefresh", {inventory: plugin.inventory});
   } else {
@@ -863,11 +864,18 @@ function displayInventory(inventory) {
       "Options": displayOpt,
     }
   });
+
+  refreshIfOld();
 }
 
 function refreshInventory() {
   clearTimeout(plugin.autoRefreshTimer);
   getSubscriptionStatus();
+}
+
+function refreshIfOld() {
+  const delay = plugin.lastRefresh + plugin.settings.autoRefreshDelay * 60 * 1000 - Date.now();
+  if (delay <= 0) return refreshInventory();
 }
 
 function autoRefresh() {
@@ -965,7 +973,6 @@ function displayOpt() {
 
   // sync keys with the keys plugin
   if (window.plugin.keys) {
-
     const syncLabel = L.DomUtil.create('label', null, container);
     syncLabel.textContent = "Auto-sync with Keys";
     syncLabel.htmlFor = "plugin-player-inventory-autosync-enable"
@@ -986,6 +993,20 @@ function displayOpt() {
     const button = L.DomUtil.create("button", null, container);
     button.textContent = "Export keys to clipboard";
     L.DomEvent.on(button, 'click', exportToClipboard);
+  }
+
+  {
+    const keysSidebarLabel = L.DomUtil.create('label', null, container);
+    keysSidebarLabel.textContent = "Keys in sidebar";
+    keysSidebarLabel.htmlFor = "plugin-player-inventory-keys-sidebar-enable"
+    const keysSidebarCheck = L.DomUtil.create('input', null, container);
+    keysSidebarCheck.type = 'checkbox';
+    keysSidebarCheck.checked = plugin.settings.keysSidebarEnable;
+    keysSidebarCheck.id = 'plugin-player-inventory-keys-sidebar-enable';
+    L.DomEvent.on(keysSidebarCheck, "change", (ev) => {
+      plugin.settings.keysSidebarEnable = keysSidebarCheck.checked === 'true' || (keysSidebarCheck.checked === 'false' ? false : keysSidebarCheck.checked);
+      storeSettings();
+    });
   }
 
   dialog({
@@ -1132,6 +1153,7 @@ function setupDisplay() {
     android.addPane('playerInventory', 'Inventory', 'ic_action_view_as_list');
     addHook('paneChanged', function (pane) {
       if (pane === 'playerInventory') {
+        refreshIfOld();
         plugin.pane.style.display = "";
       } else if (plugin.pane) {
         plugin.pane.style.display = "none";
@@ -1175,6 +1197,7 @@ function setup() {
     popupEnable: true,
     autoRefreshDelay: 30,
     autoSyncKeys: false,
+    keysSidebarEnable: false,
   }
 
   loadSettings();
@@ -1213,6 +1236,17 @@ function setup() {
       if (total > 0) {
         createPopup(data.selectedPortalGuid);
       }
+    }
+  });
+  window.addHook('portalDetailsUpdated', (data) => {
+    //{guid: guid, portal: portal, portalDetails: details, portalData: data}
+    if (!plugin.settings.keysSidebarEnable) return;
+    const total = plugin.inventory.countKey(data.guid);
+    if (total > 0) {
+      const key = plugin.inventory.keys.get(data.guid);
+      const capsules = Array.from(key.count.keys());
+      $("#randdetails")
+        .append(`<tr><td>${total}</td><td>Keys</td><td>Capsules</td><td style="white-space: normal">${capsules.join(' ')}</td></tr>`);
     }
   });
 
