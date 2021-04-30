@@ -2,12 +2,12 @@
 // @author         jaiperdu
 // @name           IITC plugin: COMM Filter Tab
 // @category       COMM
-// @version        0.1.3
+// @version        0.1.5
 // @description    Show virus in the regular Comm and add a new tab with portal/player name filter and event type filter.
 // @id             comm-filter-tab
 // @namespace      https://github.com/IITC-CE/ingress-intel-total-conversion
-// @updateURL      https://le-jeu.github.io/dist/comm-filter-tab.user.js
-// @downloadURL    https://le-jeu.github.io/dist/comm-filter-tab.user.js
+// @updateURL      https://le-jeu.github.io/iitc-plugins/comm-filter-tab.user.js
+// @downloadURL    https://le-jeu.github.io/iitc-plugins/comm-filter-tab.user.js
 // @match          https://intel.ingress.com/*
 // @grant          none
 // ==/UserScript==
@@ -19,7 +19,7 @@ if(typeof window.plugin !== 'function') window.plugin = function() {};
 //PLUGIN AUTHORS: writing a plugin outside of the IITC build environment? if so, delete these lines!!
 //(leaving them in place might break the 'About IITC' page or break update checks)
 plugin_info.buildName = 'lejeu';
-plugin_info.dateTimeVersion = '2021-03-08-212434';
+plugin_info.dateTimeVersion = '2021-04-30-102632';
 plugin_info.pluginId = 'comm-filter-tab';
 //END PLUGIN AUTHORS NOTE
 
@@ -246,30 +246,6 @@ const writeDataToHash = function(newData, storageHash, isPublicChannel, isOlderM
       storageHash.guids.unshift(parsedData.guid);
   });
 };
-
-const renderMsg = function(msg, nick, time, team, msgToPlayer, systemNarrowcast) {
-  var ta = unixTimeToHHmmss(time);
-  var tb = unixTimeToDateTimeString(time, true);
-  //add <small> tags around the milliseconds
-  tb = (tb.slice(0,19)+'<small class="milliseconds">'+tb.slice(19)+'</small>').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-
-  // help cursor via “#chat time”
-  var t = '<time title="'+tb+'" data-timestamp="'+time+'">'+ta+'</time>';
-  if ( msgToPlayer )
-  {
-    t = '<div class="pl_nudge_date">' + t + '</div><div class="pl_nudge_pointy_spacer"></div>';
-  }
-  if (systemNarrowcast)
-  {
-    msg = '<div class="system_narrowcast">' + msg + '</div>';
-  }
-  var color = COLORS[team];
-  if (nick === window.PLAYER.nickname) color = '#fd6';    //highlight things said/done by the player in a unique colour (similar to @player mentions from others in the chat text itself)
-  var s = 'style="cursor:pointer; color:'+color+'"';
-  var i = ['<span class="invisep">&lt;</span>', '<span class="invisep">&gt;</span>'];
-  return '<tr><td>'+t+'</td><td>'+i[0]+'<mark class="nickname" ' + s + '>'+ nick+'</mark>'+i[1]+'</td><td>'+msg+'</td></tr>';
-};
-
 
 const renderDivider = function(text) {
   return '<tr class="divider"><td><hr></td><td>' + text + '</td><td><hr></td></tr>';
@@ -505,7 +481,8 @@ const updateCSS = function () {
 
     // special type
     if (commFilter.filters.type == 'all') show = true;
-    if (commFilter.filters.type == 'chat' && d.type == 'chat faction') show = true;
+    if (commFilter.filters.type == 'chat all' && (d.type == 'chat' || d.type == 'chat faction')) show = true;
+    if (commFilter.filters.type == 'chat public' && d.type == 'chat') show = true;
     if (commFilter.filters.type == 'virus' && d.virus) show = true;
 
     let match = false;
@@ -519,6 +496,12 @@ const updateCSS = function () {
         match = true;
     }
     if (!show || !match) filtered.add(guid);
+  }
+
+  const highlights = [];
+  for (const guid of window.chat._public.guids) {
+    const d = window.chat._public.data[guid][4];
+    if (d.msgToPlayer) highlights.push(guid);
   }
 
   let content = '';
@@ -537,6 +520,10 @@ const updateCSS = function () {
   if (filtered.size > 0) {
     content += Array.from(filtered).map((guid) => '#chatfilter tr[data-guid="' + guid + '"]').join(',\n')
       + '{ display: none; }\n';
+  }
+  if (highlights.length > 0) {
+    content += highlights.map((guid) => '#chat tr[data-guid="' + guid + '"]').join(',\n')
+      +'{ background-color: #9118 }\n';
   }
 
   elm.textContent = content;
@@ -583,7 +570,7 @@ const tabCreate = function () {
     if(scrollBottom(t) === 0) window.chat.requestPublic(false);
   });
 
-  const events = new Set(['all', 'chat', 'chat faction', 'virus']);
+  const events = new Set(['all', 'chat all', 'chat public', 'chat faction', 'virus']);
   for (const rule of commFilter.rules) {
     events.add(rule.type);
   }
@@ -631,30 +618,20 @@ var setup = function() {
 #chatall tr.public td:nth-child(3):before,\
 #chatalerts tr.public td:nth-child(3):before,\
 #chatfilter tr.public td:nth-child(3):before {\
- content: \'[public]\';\
+  content: \'[public]\';\
   color: #ff6;\
   background-color: #550;\
   margin-right: .2rem;\
 }\
 \
-.pl_nudge_date:after {\
-  background: no-repeat url(//commondatastorage.googleapis.com/ingress.com/img/nudge_pointy.png);\
-  position:absolute;\
-  content:"";\
-  height:20px;\
-  width: 5px;\
-  right:-5px;\
-  top:-1px\
-}\
-\
 .pl_nudge_date {\
-  display: block;\
   float: unset;\
-  position:relative;\
   text-align: unset;\
-  width: 36px;\
-  padding-left: 2px;\
-  left: -2px;\
+  border: unset;\
+  background: unset;\
+  display: unset;\
+  height: unset;\
+  font-weight: bold;\
 }\
 \
 #chat #chat-filters {\
@@ -674,11 +651,18 @@ var setup = function() {
 #chat .divider td:nth-child(2) {\
   text-align: center;\
 }\
+\
+#chat tr:nth-child(odd) {\
+  background-color: #0002\
+}\
+\
+#chat tr {\
+  border-bottom: 1px solid #5558;\
+}\
 ')
     .appendTo("head");
 
   // injection
-  window.chat.renderMsg = renderMsg;
   window.chat.renderDivider = renderDivider;
   window.chat.writeDataToHash = writeDataToHash;
 

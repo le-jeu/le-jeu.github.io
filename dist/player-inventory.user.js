@@ -2,12 +2,12 @@
 // @author         jaiperdu
 // @name           IITC plugin: Player Inventory
 // @category       Info
-// @version        0.2.25
+// @version        0.2.26
 // @description    View inventory
 // @id             player-inventory
 // @namespace      https://github.com/IITC-CE/ingress-intel-total-conversion
-// @updateURL      https://le-jeu.github.io/dist/player-inventory.user.js
-// @downloadURL    https://le-jeu.github.io/dist/player-inventory.user.js
+// @updateURL      https://le-jeu.github.io/iitc-plugins/player-inventory.user.js
+// @downloadURL    https://le-jeu.github.io/iitc-plugins/player-inventory.user.js
 // @match          https://intel.ingress.com/*
 // @grant          none
 // ==/UserScript==
@@ -19,7 +19,7 @@ if(typeof window.plugin !== 'function') window.plugin = function() {};
 //PLUGIN AUTHORS: writing a plugin outside of the IITC build environment? if so, delete these lines!!
 //(leaving them in place might break the 'About IITC' page or break update checks)
 plugin_info.buildName = 'lejeu';
-plugin_info.dateTimeVersion = '2021-04-23-214614';
+plugin_info.dateTimeVersion = '2021-04-30-102632';
 plugin_info.pluginId = 'player-inventory';
 //END PLUGIN AUTHORS NOTE
 
