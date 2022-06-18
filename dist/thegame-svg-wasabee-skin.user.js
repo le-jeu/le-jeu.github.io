@@ -1,65 +1,49 @@
 // ==UserScript==
-// @id 	 thegame-svg-wasabee-skin
-// @name 	 Wasabee Skin: TheGame SVG
-// @namespace 	 https://wasabee.rocks/
-// @version 	 0.0.6
-// @updateURL 	 https://le-jeu.github.io/dist/thegame-svg-wasabee-skin.meta.js
-// @downloadURL 	 https://le-jeu.github.io/dist/thegame-svg-wasabee-skin.user.js
-// @description 	 SVG Icon set for Wasabee
-// @author 	 jaiperdu
-// @include 	 /https?:\/\/.*\.ingress\.com\/?((intel|mission)?(\/?(\?|#).*)?)?/
-// @category 	 Appearance
-// @grant 	 none
+// @author        Wasabee Project Team
+// @name          Wasabee Skin: TheGame
+// @category      Appearance
+// @version       0.2.0
+// @description   Google-like Anchor for Wasabee
+// @id            thegame-svg-wasabee-skin
+// @namespace     https://github.com/IITC-CE/ingress-intel-total-conversion
+// @updateURL     https://le-jeu.github.io/Wasabee-Skins/thegame-svg-wasabee-skin.meta.js
+// @downloadURL   https://le-jeu.github.io/Wasabee-Skins/thegame-svg-wasabee-skin.user.js
+// @match         https://intel.ingress.com/*
+// @grant         none
 // ==/UserScript==
 
+var info = {};
+if (typeof GM_info !== 'undefined' && GM_info && GM_info.script) info.script = { version: GM_info.script.version, name: GM_info.script.name, description: GM_info.script.description };
 
-
+info.buildName = 'wasabee-skin';
+info.dateTimeVersion = '2022-06-18T14:08:15.569Z';
+info.pluginId = 'thegame-svg-wasabee-skin';
 function wrapper(plugin_info) {
-  // ensure plugin framework is there, even if iitc is not yet loaded
-  if (typeof window.plugin !== "function") {
-    window.plugin = function() {};
-  }
 
-  // PLUGIN START --------------------------------------------------------
+// ensure plugin framework is there, even if iitc is not yet loaded
+if(typeof window.plugin !== 'function') window.plugin = function() {};
 
-
-  // Code injection
-  let setup = function() {
-    !function(I){var i={};function g(a){if(i[a])return i[a].exports;var c=i[a]={i:a,l:!1,exports:{}};return I[a].call(c.exports,c,c.exports,g),c.l=!0,c.exports}g.m=I,g.c=i,g.d=function(I,i,a){g.o(I,i)||Object.defineProperty(I,i,{enumerable:!0,get:a})},g.r=function(I){"undefined"!=typeof Symbol&&Symbol.toStringTag&&Object.defineProperty(I,Symbol.toStringTag,{value:"Module"}),Object.defineProperty(I,"__esModule",{value:!0})},g.t=function(I,i){if(1&i&&(I=g(I)),8&i)return I;if(4&i&&"object"==typeof I&&I&&I.__esModule)return I;var a=Object.create(null);if(g.r(a),Object.defineProperty(a,"default",{enumerable:!0,value:I}),2&i&&"string"!=typeof I)for(var c in I)g.d(a,c,function(i){return I[i]}.bind(null,c));return a},g.n=function(I){var i=I&&I.__esModule?function(){return I.default}:function(){return I};return g.d(i,"a",i),i},g.o=function(I,i){return Object.prototype.hasOwnProperty.call(I,i)},g.p="",g(g.s=0)}([function(I,i,g){window.plugin.wasabeeSkins||(window.plugin.wasabeeSkins={});const a={};window.plugin.wasabeeSkins.thegame_svg=a,a.static={CSS:{theGameSVG:g(1)},anchorTemplate:g(18)}},function(I,i,g){var a=g(2);I.exports="string"==typeof a?a:a.toString()},function(I,i,g){var a=g(3),c=g(4),M=g(5),e=g(6),n=g(7),t=g(8),o=g(9),s=g(10),C=g(11),w=g(12),l=g(13),A=g(14),x=g(15),b=g(16),r=g(17);i=a(!1);var S=c(M),D=c(e),d=c(n),u=c(t),y=c(o),m=c(s),j=c(C),P=c(w),N=c(l),Z=c(A),v=c(x),L=c(b),G=c(r);i.push([I.i,".wasabee-toolbar-op {\n  background-image: url("+S+");\n  background-size: 16px;\n}\n.wasabee-toolbar-quickdraw {\n  background-image: url("+D+");\n  background-size: 16px;\n}\n.wasabee-toolbar-link {\n  background-image: url("+d+");\n  background-size: unset;\n}\n.wasabee-toolbar-marker {\n  background-image: url("+u+");\n  background-size: unset;\n}\n.wasabee-toolbar-upload {\n  background-image: url("+y+");\n  background-size: unset;\n}\n.wasabee-toolbar-sync {\n  background-image: url("+m+");\n  background-size: unset;\n}\n\n.wasabee-anchor-icon.wasabee-layer-main {\n  background-image: url("+j+")\n}\n.wasabee-anchor-icon.wasabee-layer-groupa {\n  background-image: url("+P+")\n}\n.wasabee-anchor-icon.wasabee-layer-groupb {\n  background-image: url("+N+")\n}\n.wasabee-anchor-icon.wasabee-layer-groupc {\n  background-image: url("+Z+")\n}\n.wasabee-anchor-icon.wasabee-layer-groupd {\n  background-image: url("+v+")\n}\n.wasabee-anchor-icon.wasabee-layer-groupe {\n  background-image: url("+L+")\n}\n.wasabee-anchor-icon.wasabee-layer-groupf {\n  background-image: url("+G+")\n}",""]),I.exports=i},function(I,i,g){"use strict";I.exports=function(I){var i=[];return i.toString=function(){return this.map((function(i){var g=function(I,i){var g=I[1]||"",a=I[3];if(!a)return g;if(i&&"function"==typeof btoa){var c=(e=a,n=btoa(unescape(encodeURIComponent(JSON.stringify(e)))),t="sourceMappingURL=data:application/json;charset=utf-8;base64,".concat(n),"/*# ".concat(t," */")),M=a.sources.map((function(I){return"/*# sourceURL=".concat(a.sourceRoot||"").concat(I," */")}));return[g].concat(M).concat([c]).join("\n")}var e,n,t;return[g].join("\n")}(i,I);return i[2]?"@media ".concat(i[2]," {").concat(g,"}"):g})).join("")},i.i=function(I,g,a){"string"==typeof I&&(I=[[null,I,""]]);var c={};if(a)for(var M=0;M<this.length;M++){var e=this[M][0];null!=e&&(c[e]=!0)}for(var n=0;n<I.length;n++){var t=[].concat(I[n]);a&&c[t[0]]||(g&&(t[2]?t[2]="".concat(g," and ").concat(t[2]):t[2]=g),i.push(t))}},i}},function(I,i,g){"use strict";I.exports=function(I,i){return i||(i={}),"string"!=typeof(I=I&&I.__esModule?I.default:I)?I:(/^['"].*['"]$/.test(I)&&(I=I.slice(1,-1)),i.hash&&(I+=i.hash),/["'() \t\n]/.test(I)||i.needQuotes?'"'.concat(I.replace(/"/g,'\\"').replace(/\n/g,"\\n"),'"'):I)}},function(I,i,g){"use strict";g.r(i),i.default="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIHZpZXdCb3g9IjAgMCAyMCAyMCI+CiAgPHBhdGggZD0iTTcgMTVoMTJ2Mkg3em0wLTZoMTJ2Mkg3em0wLTZoMTJ2Mkg3eiIvPgogIDxjaXJjbGUgY3g9IjMiIGN5PSI0IiByPSIyIi8+CiAgPGNpcmNsZSBjeD0iMyIgY3k9IjEwIiByPSIyIi8+CiAgPGNpcmNsZSBjeD0iMyIgY3k9IjE2IiByPSIyIi8+Cjwvc3ZnPg=="},function(I,i,g){"use strict";g.r(i),i.default="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIHZpZXdCb3g9Ii01IC01IDMxMCAzMTAiIHZlcnNpb249IjEuMSI+CiAgPHBhdGggZD0iTTAsMzAwTDE1MCwwTDMwMCwzMDBMMTUwLDEwMEwwLDMwMEwxNTAsMjAwTDMwMCwzMDBMMCwzMDAiIHN0eWxlPSJmaWxsOm5vbmU7c3Ryb2tlOmJsYWNrO3N0cm9rZS13aWR0aDoxMCIvPgo8L3N2Zz4K"},function(I,i,g){"use strict";g.r(i),i.default="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNiIgaGVpZ2h0PSIyNiIgdmlld0JveD0iMCAwIDI2IDI2Ij4KICA8Zz4KICAgIDxjaXJjbGUgcj0iNSIgY3g9IjkiIGN5PSIxNyIgLz4KICAgIDxjaXJjbGUgcj0iNSIgY3g9IjE3IiBjeT0iOSIgLz4KICAgIDxjaXJjbGUgcj0iMyIgY3g9IjkiIGN5PSIxNyIgZmlsbD0id2hpdGUiIC8+CiAgICA8Y2lyY2xlIHI9IjMiIGN4PSIxNyIgY3k9IjkiIGZpbGw9IndoaXRlIiAvPgogICAgPHBvbHlnb24gcG9pbnRzPSI3LDE1IDE1LDcgMTksMTEgMTEsMTkiIGZpbGw9IndoaXRlIiAvPgogICAgPGxpbmUgeDE9IjkiIHkxPSIxNyIgeDI9IjE3IiB5Mj0iOSIgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIC8+CiAgPC9nPgogIDxnIHN0eWxlPSJmaWxsOiBub25lOyBzdHJva2U6IGJsYWNrOyBzdHJva2Utd2lkdGg6IDI7IHN0cm9rZS1saW5lY2FwOiBzcXVhcmUiPgogICAgPGxpbmUgeDE9IjIwIiB5MT0iMTgiIHgyPSIyMCIgeTI9IjIyIiAvPgogICAgPGxpbmUgeDE9IjE4IiB5MT0iMjAiIHgyPSIyMiIgeTI9IjIwIiAvPgogIDwvZz4KPC9zdmc+"},function(I,i,g){"use strict";g.r(i),i.default="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNiIgaGVpZ2h0PSIyNiIgdmlld0JveD0iMCAwIDI2IDI2Ij4KICA8Zz4KICAJPHBvbHlnb24gcG9pbnRzPSI2LDggNiwxNCAxMSwxNyAxNiwxNCAxNiw4IDExLDUiIC8+CiAgCTxwb2x5Z29uIHBvaW50cz0iNiwxNiAxMSwxOSAxNiwxNiAxMSwyMyIgLz4KICAJPGNpcmNsZSByPSIyIiBjeD0iMTEiIGN5PSIxMSIgZmlsbD0id2hpdGUiIC8+Cgk8L2c+Cgk8ZyBzdHlsZT0iZmlsbDogbm9uZTsgc3Ryb2tlOiBibGFjazsgc3Ryb2tlLXdpZHRoOiAyOyBzdHJva2UtbGluZWNhcDogc3F1YXJlIj4KCSAgPGxpbmUgeDE9IjE5IiB5MT0iMTciIHgyPSIxOSIgeTI9IjIxIiAvPgoJICA8bGluZSB4MT0iMTciIHkxPSIxOSIgeDI9IjIxIiB5Mj0iMTkiIC8+Cgk8L2c+Cjwvc3ZnPg=="},function(I,i,g){"use strict";g.r(i),i.default="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciCiAgICAgIHdpZHRoPSIyNiIgaGVpZ2h0PSIyNiIgdmlld0JveD0iMCAwIDI2IDI2Ij4KICA8IS0tIDxyZWN0IHg9IjUiIHk9IjUiIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgZmlsbD0iYmx1ZSIvPiAtLT4KICA8Zz4KCSAgPHBhdGggZD0iTSA4LDkgYSA1LDUsMCwwLDAsMSwxMSBsIDgsMCBhIDUsNSwwLDAsMCwxLC0xMSBhIDYsOCwwLDAsMCwtMTAsMCIvPgoJICA8cG9seWdvbiBwb2ludHM9IjExLDE4IDE1LDE4IDE1LDE0IDE4LDE0IDEzLDkgOCwxNCAxMSwxNCIgZmlsbD0id2hpdGUiLz4KCTwvZz4KPC9zdmc+"},function(I,i,g){"use strict";g.r(i),i.default="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciCiAgICAgIHdpZHRoPSIyNiIgaGVpZ2h0PSIyNiIgdmlld0JveD0iMCAwIDI2IDI2Ij4KICA8IS0tIDxyZWN0IHg9IjUiIHk9IjUiIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgZmlsbD0iYmx1ZSIvPgogIDxpbWFnZSBocmVmPSJ0b29sYmFyX2Rvd25sb2FkLnBuZyIgeD0iNSIgeT0iNSIgd2lkdGg9IjE2IiBoZWlnaHQ9IjE2IiAvPiAtLT4KICA8cG9seWdvbiBwb2ludHM9IjExLDggMTUsOCAxNSwxMiAxOCwxMiAxMywxNyA4LDEyIDExLDEyIiAvPgogIDxsaW5lIHgxPSI4IiB5MT0iMTkiIHgyPSIxOCIgeTI9IjE5IiBzdHJva2U9ImJsYWNrIiBzdHJva2Utd2lkdGg9IjEiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgLz4KPC9zdmc+"},function(I,i,g){"use strict";g.r(i),i.default="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB2aWV3Qm94PSItMSAtMSAyMiA0MiIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgogIDxtYXNrIGlkPSJob2xlIj4KICAgIDxyZWN0IHg9Ii0xIiB5PSItMSIgd2lkdGg9IjIyIiBoZWlnaHQ9IjQyIiBmaWxsPSJ3aGl0ZSIgLz4KICAgIDxjaXJjbGUgY3g9IjEwIiBjeT0iMTAiIHI9IjQuNSIgZmlsbD0iYmxhY2siLz4KICA8L21hc2s+CiAgPGcgbWFzaz0idXJsKCNob2xlKSIgc3R5bGU9ImZpbGw6aHNsKDMsIDcwJSwgNTAlKTtzdHJva2U6YmxhY2s7c3Ryb2tlLWxpbmVqb2luOnJvdW5kIj4KCSAgPHBhdGggZD0iTSAwLDEwIEEgMTAsMTAsMCwwLDEsMjAsMTAgQyAyMCwyMCwgMTAsMjAsIDEwLDQwIEMgMTAsMjAsIDAsMjAsIDAsMTAiLz4KCSAgPGNpcmNsZSBjeD0iMTAiIGN5PSIxMCIgcj0iNC41IiAvPgoJPC9nPgo8L3N2Zz4K"},function(I,i,g){"use strict";g.r(i),i.default="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB2aWV3Qm94PSItMSAtMSAyMiA0MiIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgogIDxtYXNrIGlkPSJob2xlIj4KICAgIDxyZWN0IHg9Ii0xIiB5PSItMSIgd2lkdGg9IjIyIiBoZWlnaHQ9IjQyIiBmaWxsPSJ3aGl0ZSIgLz4KICAgIDxjaXJjbGUgY3g9IjEwIiBjeT0iMTAiIHI9IjQuNSIgZmlsbD0iYmxhY2siLz4KICA8L21hc2s+CiAgPGcgbWFzaz0idXJsKCNob2xlKSIgc3R5bGU9ImZpbGw6aHNsKDM5LCA3MCUsIDUwJSk7c3Ryb2tlOmJsYWNrO3N0cm9rZS1saW5lam9pbjpyb3VuZCI+CgkgIDxwYXRoIGQ9Ik0gMCwxMCBBIDEwLDEwLDAsMCwxLDIwLDEwIEMgMjAsMjAsIDEwLDIwLCAxMCw0MCBDIDEwLDIwLCAwLDIwLCAwLDEwIi8+CgkgIDxjaXJjbGUgY3g9IjEwIiBjeT0iMTAiIHI9IjQuNSIgLz4KCTwvZz4KPC9zdmc+"},function(I,i,g){"use strict";g.r(i),i.default="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB2aWV3Qm94PSItMSAtMSAyMiA0MiIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgogIDxtYXNrIGlkPSJob2xlIj4KICAgIDxyZWN0IHg9Ii0xIiB5PSItMSIgd2lkdGg9IjIyIiBoZWlnaHQ9IjQyIiBmaWxsPSJ3aGl0ZSIgLz4KICAgIDxjaXJjbGUgY3g9IjEwIiBjeT0iMTAiIHI9IjQuNSIgZmlsbD0iYmxhY2siLz4KICA8L21hc2s+CiAgPGcgbWFzaz0idXJsKCNob2xlKSIgc3R5bGU9ImZpbGw6aHNsKDYwLCA3MCUsIDUwJSk7c3Ryb2tlOmJsYWNrO3N0cm9rZS1saW5lam9pbjpyb3VuZCI+CgkgIDxwYXRoIGQ9Ik0gMCwxMCBBIDEwLDEwLDAsMCwxLDIwLDEwIEMgMjAsMjAsIDEwLDIwLCAxMCw0MCBDIDEwLDIwLCAwLDIwLCAwLDEwIi8+CgkgIDxjaXJjbGUgY3g9IjEwIiBjeT0iMTAiIHI9IjQuNSIgLz4KCTwvZz4KPC9zdmc+"},function(I,i,g){"use strict";g.r(i),i.default="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB2aWV3Qm94PSItMSAtMSAyMiA0MiIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgogIDxtYXNrIGlkPSJob2xlIj4KICAgIDxyZWN0IHg9Ii0xIiB5PSItMSIgd2lkdGg9IjIyIiBoZWlnaHQ9IjQyIiBmaWxsPSJ3aGl0ZSIgLz4KICAgIDxjaXJjbGUgY3g9IjEwIiBjeT0iMTAiIHI9IjQuNSIgZmlsbD0iYmxhY2siLz4KICA8L21hc2s+CiAgPGcgbWFzaz0idXJsKCNob2xlKSIgc3R5bGU9ImZpbGw6aHNsKDEyMCwgNzAlLCA1MCUpO3N0cm9rZTpibGFjaztzdHJva2UtbGluZWpvaW46cm91bmQiPgoJICA8cGF0aCBkPSJNIDAsMTAgQSAxMCwxMCwwLDAsMSwyMCwxMCBDIDIwLDIwLCAxMCwyMCwgMTAsNDAgQyAxMCwyMCwgMCwyMCwgMCwxMCIvPgoJICA8Y2lyY2xlIGN4PSIxMCIgY3k9IjEwIiByPSI0LjUiIC8+Cgk8L2c+Cjwvc3ZnPg=="},function(I,i,g){"use strict";g.r(i),i.default="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB2aWV3Qm94PSItMSAtMSAyMiA0MiIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgogIDxtYXNrIGlkPSJob2xlIj4KICAgIDxyZWN0IHg9Ii0xIiB5PSItMSIgd2lkdGg9IjIyIiBoZWlnaHQ9IjQyIiBmaWxsPSJ3aGl0ZSIgLz4KICAgIDxjaXJjbGUgY3g9IjEwIiBjeT0iMTAiIHI9IjQuNSIgZmlsbD0iYmxhY2siLz4KICA8L21hc2s+CiAgPGcgbWFzaz0idXJsKCNob2xlKSIgc3R5bGU9ImZpbGw6aHNsKDI4NSwgNzAlLCA1MCUpO3N0cm9rZTpibGFjaztzdHJva2UtbGluZWpvaW46cm91bmQiPgoJICA8cGF0aCBkPSJNIDAsMTAgQSAxMCwxMCwwLDAsMSwyMCwxMCBDIDIwLDIwLCAxMCwyMCwgMTAsNDAgQyAxMCwyMCwgMCwyMCwgMCwxMCIvPgoJICA8Y2lyY2xlIGN4PSIxMCIgY3k9IjEwIiByPSI0LjUiIC8+Cgk8L2c+Cjwvc3ZnPgo="},function(I,i,g){"use strict";g.r(i),i.default="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB2aWV3Qm94PSItMSAtMSAyMiA0MiIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgogIDxtYXNrIGlkPSJob2xlIj4KICAgIDxyZWN0IHg9Ii0xIiB5PSItMSIgd2lkdGg9IjIyIiBoZWlnaHQ9IjQyIiBmaWxsPSJ3aGl0ZSIgLz4KICAgIDxjaXJjbGUgY3g9IjEwIiBjeT0iMTAiIHI9IjQuNSIgZmlsbD0iYmxhY2siLz4KICA8L21hc2s+CiAgPGcgbWFzaz0idXJsKCNob2xlKSIgc3R5bGU9ImZpbGw6aHNsKDE4MCwgNzAlLCA1MCUpO3N0cm9rZTpibGFjaztzdHJva2UtbGluZWpvaW46cm91bmQiPgoJICA8cGF0aCBkPSJNIDAsMTAgQSAxMCwxMCwwLDAsMSwyMCwxMCBDIDIwLDIwLCAxMCwyMCwgMTAsNDAgQyAxMCwyMCwgMCwyMCwgMCwxMCIvPgoJICA8Y2lyY2xlIGN4PSIxMCIgY3k9IjEwIiByPSI0LjUiIC8+Cgk8L2c+Cjwvc3ZnPgo="},function(I,i,g){"use strict";g.r(i),i.default="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB2aWV3Qm94PSItMSAtMSAyMiA0MiIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgogIDxtYXNrIGlkPSJob2xlIj4KICAgIDxyZWN0IHg9Ii0xIiB5PSItMSIgd2lkdGg9IjIyIiBoZWlnaHQ9IjQyIiBmaWxsPSJ3aGl0ZSIgLz4KICAgIDxjaXJjbGUgY3g9IjEwIiBjeT0iMTAiIHI9IjQuNSIgZmlsbD0iYmxhY2siLz4KICA8L21hc2s+CiAgPGcgbWFzaz0idXJsKCNob2xlKSIgc3R5bGU9ImZpbGw6aHNsKDMxNSwgNzAlLCA1MCUpO3N0cm9rZTpibGFjaztzdHJva2UtbGluZWpvaW46cm91bmQiPgoJICA8cGF0aCBkPSJNIDAsMTAgQSAxMCwxMCwwLDAsMSwyMCwxMCBDIDIwLDIwLCAxMCwyMCwgMTAsNDAgQyAxMCwyMCwgMCwyMCwgMCwxMCIvPgoJICA8Y2lyY2xlIGN4PSIxMCIgY3k9IjEwIiByPSI0LjUiIC8+Cgk8L2c+Cjwvc3ZnPgo="},function(I,i){I.exports='<svg>\n\t<symbol id="wasabee-anchor-icon" viewBox="0 0 25 41">\n\t\t<mask id="hole">\n\t    <rect width="100%" height="100%" fill="white" />\n\t    <circle cx="12" cy="10" r="4.5" fill="black"/>\n\t  </mask>\n\t  <g mask="url(#hole)" style="stroke:black;stroke-linejoin:round">\n\t\t  <path d="M 2,10 A 10,10,0,0,1,22,10 C 22,20, 12,20, 12,40 C 12,20, 2,20, 2,10"/>\n\t\t  <circle cx="12" cy="10" r="4.5" />\n\t\t</g>\n\t</symbol>\n</svg>\n'}]);
-
-    // there really isn't anything to do here, but if you need startup logic for your skin, add it here
-    if (!window.plugin.wasabeeSkins) window.plugin.wasabeeSkins = {};
-  };
-
-  // PLUGIN END ----------------------------------------------------------
-  setup.info = plugin_info; //add the script info data to the function as a property
-  if (!window.bootPlugins) {
-    window.bootPlugins = [];
-  }
-  window.bootPlugins.push(setup);
-  // if IITC has already booted, immediately run the 'setup' function
-  if (window.iitcLoaded && typeof setup === "function") {
-    setup();
-  }
-
+var setup;
+function define(fun) { setup = fun; }
+define((function(){"use strict";const e={};window.plugin.wasabeeSkins.thegame_svg=e,e.static={anchorTemplate:'<svg>\t<symbol id="wasabee-anchor-icon" viewBox="0 0 25 41">\t\t<mask id="hole">\t    <rect width="100%" height="100%" fill="white"/> <circle cx="12" cy="10" r="4.5" fill="black"/> </mask> <g mask="url(#hole)" style="stroke:black;stroke-linejoin:round">\t\t  <path d="M 2,10 A 10,10,0,0,1,22,10 C 22,20, 12,20, 12,40 C 12,20, 2,20, 2,10"/> <circle cx="12" cy="10" r="4.5"/> </g> </symbol> </svg>'},window.plugin.wasabeeSkins.TheGame=e}));
+if(!window.bootPlugins) window.bootPlugins = [];
+window.bootPlugins.push(setup);
+// if IITC has already booted, immediately run the 'setup' function
+if(window.iitcLoaded && typeof setup === 'function') setup();
+setup.info = plugin_info; //add the script info data to the function as a property
 }
-//wrapper end
 
 // inject code into site context
-var script = document.createElement("script");
-var info = {};
-if (typeof GM_info !== "undefined" && GM_info && GM_info.script) {
-  info.script = {
-    version: GM_info.script.version,
-    name: GM_info.script.name,
-    description: GM_info.script.description
-  };
+var script = document.createElement('script');
+// if on last IITC mobile, will be replaced by wrapper(info)
+var mobile = `script.appendChild(document.createTextNode('('+ wrapper +')('+JSON.stringify(info)+');'));
+(document.body || document.head || document.documentElement).appendChild(script);`;
+// detect if mobile
+if (mobile.startsWith('script')) {
+  script.appendChild(document.createTextNode('('+ wrapper +')('+JSON.stringify(info)+');'));
+  script.appendChild(document.createTextNode('//# sourceURL=iitc:///plugins/thegame-svg-wasabee-skin.js'));
+  (document.body || document.head || document.documentElement).appendChild(script);
+} else {
+  // mobile string
+  wrapper(info);
 }
-
-script.appendChild(
-  document.createTextNode("(" + wrapper + ")(" + JSON.stringify(info) + ");")
-);
-(document.body || document.head || document.documentElement).appendChild(
-  script
-);
-
