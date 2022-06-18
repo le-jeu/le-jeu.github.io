@@ -2,7 +2,7 @@
 // @author        Wasabee Project Team
 // @name          Wasabee Skin: TheGame
 // @category      Appearance
-// @version       0.2.0
+// @version       0.2.1
 // @description   Google-like Anchor for Wasabee
 // @id            thegame-svg-wasabee-skin
 // @namespace     https://github.com/IITC-CE/ingress-intel-total-conversion

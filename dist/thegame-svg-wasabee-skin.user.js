@@ -2,7 +2,7 @@
 // @author        Wasabee Project Team
 // @name          Wasabee Skin: TheGame
 // @category      Appearance
-// @version       0.2.0
+// @version       0.2.1
 // @description   Google-like Anchor for Wasabee
 // @id            thegame-svg-wasabee-skin
 // @namespace     https://github.com/IITC-CE/ingress-intel-total-conversion
@@ -16,7 +16,7 @@ var info = {};
 if (typeof GM_info !== 'undefined' && GM_info && GM_info.script) info.script = { version: GM_info.script.version, name: GM_info.script.name, description: GM_info.script.description };
 
 info.buildName = 'wasabee-skin';
-info.dateTimeVersion = '2022-06-18T14:08:15.569Z';
+info.dateTimeVersion = '2022-06-18T17:24:58.338Z';
 info.pluginId = 'thegame-svg-wasabee-skin';
 function wrapper(plugin_info) {
 
@@ -25,7 +25,7 @@ if(typeof window.plugin !== 'function') window.plugin = function() {};
 
 var setup;
 function define(fun) { setup = fun; }
-define((function(){"use strict";const e={};window.plugin.wasabeeSkins.thegame_svg=e,e.static={anchorTemplate:'<svg>\t<symbol id="wasabee-anchor-icon" viewBox="0 0 25 41">\t\t<mask id="hole">\t    <rect width="100%" height="100%" fill="white"/> <circle cx="12" cy="10" r="4.5" fill="black"/> </mask> <g mask="url(#hole)" style="stroke:black;stroke-linejoin:round">\t\t  <path d="M 2,10 A 10,10,0,0,1,22,10 C 22,20, 12,20, 12,40 C 12,20, 2,20, 2,10"/> <circle cx="12" cy="10" r="4.5"/> </g> </symbol> </svg>'},window.plugin.wasabeeSkins.TheGame=e}));
+define((function(){"use strict";const e={};window.plugin.wasabeeSkins.thegame_svg=e,e.static={anchorTemplate:'<svg>\t<symbol id="wasabee-anchor-icon" viewBox="0 0 25 41">\t\t<mask id="hole">\t    <rect width="100%" height="100%" fill="white"/> <circle cx="12" cy="10" r="4.5" fill="black"/> </mask> <g mask="url(#hole)" style="stroke:black;stroke-linejoin:round">\t\t  <path d="M 2,10 A 10,10,0,0,1,22,10 C 22,20, 12,20, 12,40 C 12,20, 2,20, 2,10"/> <circle cx="12" cy="10" r="4.5"/> </g> </symbol> </svg>'},window.plugin.wasabeeSkins||(window.plugin.wasabeeSkins={}),window.plugin.wasabeeSkins.TheGame=e}));
 if(!window.bootPlugins) window.bootPlugins = [];
 window.bootPlugins.push(setup);
 // if IITC has already booted, immediately run the 'setup' function

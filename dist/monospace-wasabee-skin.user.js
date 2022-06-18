@@ -2,7 +2,7 @@
 // @author        Wasabee Project Team
 // @name          Wasabee Skin: Monospace
 // @category      Appearance
-// @version       0.2.0
+// @version       0.2.1
 // @description   Monospace for IITC&Wasabee
 // @id            monospace-wasabee-skin
 // @namespace     https://github.com/IITC-CE/ingress-intel-total-conversion
@@ -16,7 +16,7 @@ var info = {};
 if (typeof GM_info !== 'undefined' && GM_info && GM_info.script) info.script = { version: GM_info.script.version, name: GM_info.script.name, description: GM_info.script.description };
 
 info.buildName = 'wasabee-skin';
-info.dateTimeVersion = '2022-06-18T14:08:15.568Z';
+info.dateTimeVersion = '2022-06-18T17:24:58.338Z';
 info.pluginId = 'monospace-wasabee-skin';
 function wrapper(plugin_info) {
 
@@ -25,7 +25,7 @@ if(typeof window.plugin !== 'function') window.plugin = function() {};
 
 var setup;
 function define(fun) { setup = fun; }
-define((function(){"use strict";const t={static:{CSS:{monospace:"#map,body,button{font-family:monospace,Roboto,Helvetica Neue,Helvetica,sans-serif}body{font-size:12px}button{font-size:13px}h2 #name{width:185px}#chat td:first-child,#chatinput td:first-child{font-size:12px}#updatestatus{font-size:11px}#bookmarksBox *{font-family:monospace}"}}};window.plugin.wasabeeSkins.Monospace=t}));
+define((function(){"use strict";const t={static:{CSS:{monospace:"#map,body,button{font-family:monospace,Roboto,Helvetica Neue,Helvetica,sans-serif}body{font-size:12px}button{font-size:13px}h2 #name{width:185px}#chat td:first-child,#chatinput td:first-child{font-size:12px}#updatestatus{font-size:11px}#bookmarksBox *{font-family:monospace}"}}};window.plugin.wasabeeSkins||(window.plugin.wasabeeSkins={}),window.plugin.wasabeeSkins.Monospace=t}));
 if(!window.bootPlugins) window.bootPlugins = [];
 window.bootPlugins.push(setup);
 // if IITC has already booted, immediately run the 'setup' function

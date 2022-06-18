@@ -2,7 +2,7 @@
 // @author        Wasabee Project Team
 // @name          Wasabee Skin: Draw tools Anchors
 // @category      Appearance
-// @version       0.2.0
+// @version       0.2.1
 // @description   Draw tools Anchors for Wasabee
 // @id            draw-tools-anchors-wasabee-skin
 // @namespace     https://github.com/IITC-CE/ingress-intel-total-conversion

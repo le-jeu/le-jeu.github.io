@@ -2,7 +2,7 @@
 // @author        Wasabee Project Team
 // @name          Wasabee Skin: Monospace
 // @category      Appearance
-// @version       0.2.0
+// @version       0.2.1
 // @description   Monospace for IITC&Wasabee
 // @id            monospace-wasabee-skin
 // @namespace     https://github.com/IITC-CE/ingress-intel-total-conversion

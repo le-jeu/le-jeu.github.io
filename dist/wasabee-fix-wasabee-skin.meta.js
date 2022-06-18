@@ -2,7 +2,7 @@
 // @author        Wasabee Project Team
 // @name          Wasabee Skin: Early fix
 // @category      Appearance
-// @version       0.2.0
+// @version       0.2.1
 // @description   Some UI fix and experiments for Wasabee
 // @id            wasabee-fix-wasabee-skin
 // @namespace     https://github.com/IITC-CE/ingress-intel-total-conversion
